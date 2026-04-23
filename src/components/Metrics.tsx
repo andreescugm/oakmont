@@ -40,19 +40,20 @@ function MetricItem({ item, idx }: { item: typeof items[0], idx: number }) {
   return (
     <div
       ref={ref}
+      className="metrics-card"
       style={{
         padding: '32px 28px',
         borderRight: idx < 3 ? '1px solid rgba(255,255,255,0.12)' : 'none',
         transition: 'background 0.2s',
       }}
     >
-      <div style={{
+      <div className="metrics-num" style={{
         fontFamily: 'var(--font-display)', fontSize: 46, fontWeight: 400,
         color: '#fff', lineHeight: 1, letterSpacing: '-0.04em', marginBottom: 6,
       }}>
         {item.target !== undefined ? `${val}` : item.display}
       </div>
-      <div style={{
+      <div className="metrics-label" style={{
         fontFamily: 'var(--font-caps)', fontSize: 7, fontWeight: 600,
         letterSpacing: 2.8, textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)',
       }}>{item.label}</div>
@@ -67,7 +68,7 @@ export default function Metrics() {
         position: 'absolute', inset: 0,
         background: 'linear-gradient(135deg, rgba(255,255,255,0.04) 0%, transparent 60%)',
       }} />
-      <div style={{
+      <div className="metrics-grid" style={{
         maxWidth: 1200, margin: '0 auto',
         display: 'grid', gridTemplateColumns: 'repeat(4,1fr)',
         position: 'relative', zIndex: 1,

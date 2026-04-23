@@ -1,5 +1,7 @@
+import { useRef } from 'react'
 import Reveal from './Reveal'
 import MobileCarousel from './MobileCarousel'
+import CarouselArrows from './CarouselArrows'
 
 const cards = [
   { num: 1, tag: 'F · 01', title: 'Diagnóstico Estratégico', titleEm: '60 min', body: 'Identificamos los 3 procesos que más tiempo consumen y calculamos el impacto exacto de automatizarlos. Sin humo. Sin venta disfrazada de consultoría.', link: '#diagnostico', linkText: 'Reservar sesión →' },
@@ -11,8 +13,10 @@ const cards = [
 ]
 
 export default function Offering() {
+  const carouselRef = useRef<HTMLDivElement>(null)
   return (
     <section style={{ background: 'var(--bg-base)', padding: '88px 0', position: 'relative', overflow: 'hidden' }}>
+      <CarouselArrows scrollRef={carouselRef} />
       {/* grid pattern */}
       <div style={{
         position: 'absolute', inset: 0, pointerEvents: 'none',
@@ -46,7 +50,7 @@ export default function Offering() {
           </h2>
         </Reveal>
 
-        <MobileCarousel count={cards.length} style={{
+        <MobileCarousel count={cards.length} scrollRef={carouselRef} style={{
           display: 'grid', gridTemplateColumns: '1fr 1fr',
           gap: 1, background: 'var(--border-subtle)',
           border: '1px solid var(--border-subtle)',

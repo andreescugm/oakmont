@@ -1,5 +1,7 @@
+import { useRef } from 'react'
 import Reveal from './Reveal'
 import MobileCarousel from './MobileCarousel'
+import CarouselArrows from './CarouselArrows'
 
 interface Review {
   featured?: boolean
@@ -119,8 +121,10 @@ function Card({ r, delay }: { r: Review; delay: number }) {
 }
 
 export default function Testimonials() {
+  const carouselRef = useRef<HTMLDivElement>(null)
   return (
     <section style={{ background: 'var(--bg-surface)', padding: '88px 0', position: 'relative', overflow: 'hidden' }}>
+      <CarouselArrows scrollRef={carouselRef} />
       <div style={{
         position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
         width: 1, height: 70, background: 'linear-gradient(180deg, var(--copper), transparent)',
@@ -162,7 +166,7 @@ export default function Testimonials() {
         </Reveal>
       </div>
 
-      <MobileCarousel count={reviews.length} style={{
+      <MobileCarousel count={reviews.length} scrollRef={carouselRef} style={{
         maxWidth: 1200, margin: '0 auto', padding: '0 48px',
         columnCount: 3, columnGap: 18, position: 'relative', zIndex: 1,
       }}>

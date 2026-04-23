@@ -1,5 +1,7 @@
+import { useRef } from 'react'
 import Reveal from './Reveal'
 import MobileCarousel from './MobileCarousel'
+import CarouselArrows from './CarouselArrows'
 
 const cells = [
   { num: '01 · Tiempo', title: 'Tiempo recuperado', body: <>Las horas que tu equipo gasta en tareas repetitivas vuelven a estar disponibles para lo que genera ingresos. <strong style={{ color: 'var(--copper-soft)', fontWeight: 500 }}>Cualificación, seguimiento, atención inicial — automatizados.</strong></> },
@@ -9,8 +11,10 @@ const cells = [
 ]
 
 export default function Deliverables() {
+  const carouselRef = useRef<HTMLDivElement>(null)
   return (
-    <section style={{ background: 'var(--bg-base)', padding: '88px 0' }}>
+    <section style={{ background: 'var(--bg-base)', padding: '88px 0', position: 'relative' }}>
+      <CarouselArrows scrollRef={carouselRef} />
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 48px' }}>
         <Reveal dir="left">
           <span style={{
@@ -34,7 +38,7 @@ export default function Deliverables() {
           </h2>
         </Reveal>
 
-        <MobileCarousel count={cells.length} style={{
+        <MobileCarousel count={cells.length} scrollRef={carouselRef} style={{
           display: 'grid', gridTemplateColumns: '1fr 1fr',
           gap: 1, background: 'var(--border-subtle)', border: '1px solid var(--border-subtle)',
           maxWidth: 1000, margin: '0 auto 56px',

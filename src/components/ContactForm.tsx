@@ -3,26 +3,20 @@ import Reveal from './Reveal'
 
 export default function ContactForm() {
   const [form, setForm] = useState({ nombre: '', email: '', empresa: '', telefono: '', mensaje: '' })
-  const [sent, setSent] = useState(false)
+  const [enviado, setEnviado] = useState(false)
 
   const handle = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm(f => ({ ...f, [e.target.name]: e.target.value }))
 
-  const submit = (e: React.FormEvent) => {
+  const submit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (!form.nombre.trim() || !form.email.trim()) return
-    const body = [
-      `Nombre: ${form.nombre}`,
-      `Empresa: ${form.empresa}`,
-      `Email: ${form.email}`,
-      `Teléfono: ${form.telefono}`,
-      ``,
-      `Mensaje:`,
-      form.mensaje,
-    ].join('%0A')
-    window.location.href = `mailto:ceo@andreescuoakmont.com?subject=Diagn%C3%B3stico%20gratuito&body=${body}`
-    setSent(true)
-    setTimeout(() => setSent(false), 3000)
+    const data = new FormData(e.currentTarget)
+    if (!data.get('nombre') || !data.get('email')) return
+    setEnviado(true)
+    setTimeout(() => {
+      setEnviado(false)
+      setForm({ nombre: '', email: '', empresa: '', telefono: '', mensaje: '' })
+    }, 5000)
   }
 
   const fieldStyle: React.CSSProperties = {
@@ -110,29 +104,7 @@ export default function ContactForm() {
           </p>
         </Reveal>
 
-        {sent ? (
-          <Reveal dir="up">
-            <div style={{
-              border: '1px solid var(--border-mid)',
-              background: 'var(--bg-raised)',
-              padding: '48px 40px', textAlign: 'center',
-            }}>
-              <span style={{
-                fontFamily: 'var(--font-caps)', fontSize: 8, fontWeight: 600,
-                letterSpacing: 2.5, textTransform: 'uppercase', color: 'var(--copper-soft)',
-                display: 'block', marginBottom: 16,
-              }}>Mensaje recibido</span>
-              <p style={{
-                fontFamily: 'var(--font-serif)', fontSize: 17, fontWeight: 300,
-                fontStyle: 'italic', lineHeight: 1.8, color: 'var(--text-secondary)',
-              }}>
-                Te contactaremos en menos de 24 horas para confirmar la sesión.
-                Mientras tanto, si tienes alguna duda urgente puedes escribirnos directamente.
-              </p>
-            </div>
-          </Reveal>
-        ) : (
-          <Reveal dir="up" delay={200}>
+        <Reveal dir="up" delay={200}>
             <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
               {/* nombre + empresa */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
@@ -201,29 +173,44 @@ export default function ContactForm() {
               </div>
 
               {/* submit */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 28, flexWrap: 'wrap' }}>
-                <button
-                  type="submit"
-                  style={{
-                    fontFamily: 'var(--font-caps)', fontSize: 8.5, fontWeight: 600,
-                    letterSpacing: 2.5, textTransform: 'uppercase',
-                    background: 'var(--copper)', color: '#fff',
-                    padding: '15px 40px', border: 'none', cursor: 'pointer',
-                    transition: 'background 0.22s, transform 0.15s',
-                  }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#a86830'; (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)' }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--copper)'; (e.currentTarget as HTMLElement).style.transform = 'none' }}
-                >
-                  Reservar diagnóstico gratuito →
-                </button>
-                <span style={{
-                  fontFamily: 'var(--font-caps)', fontSize: 6.5, fontWeight: 400,
-                  letterSpacing: 2, textTransform: 'uppercase', color: 'var(--text-muted)',
-                }}>Sin compromiso · Sin tarjeta</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 28, flexWrap: 'wrap', minHeight: 52 }}>
+                {enviado ? (
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 12,
+                    background: 'var(--bg-raised)', border: '1px solid var(--border-mid)',
+                    padding: '14px 24px',
+                  }}>
+                    <span style={{ color: 'var(--copper-soft)', fontSize: 16 }}>✓</span>
+                    <span style={{
+                      fontFamily: 'var(--font-caps)', fontSize: 7.5, fontWeight: 600,
+                      letterSpacing: 2, textTransform: 'uppercase', color: 'var(--text-secondary)',
+                    }}>Mensaje recibido. Te contactaremos en menos de 24 horas.</span>
+                  </div>
+                ) : (
+                  <>
+                    <button
+                      type="submit"
+                      style={{
+                        fontFamily: 'var(--font-caps)', fontSize: 8.5, fontWeight: 600,
+                        letterSpacing: 2.5, textTransform: 'uppercase',
+                        background: 'var(--copper)', color: '#fff',
+                        padding: '15px 40px', border: 'none', cursor: 'pointer',
+                        transition: 'background 0.22s, transform 0.15s',
+                      }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#a86830'; (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)' }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--copper)'; (e.currentTarget as HTMLElement).style.transform = 'none' }}
+                    >
+                      Reservar diagnóstico gratuito →
+                    </button>
+                    <span style={{
+                      fontFamily: 'var(--font-caps)', fontSize: 6.5, fontWeight: 400,
+                      letterSpacing: 2, textTransform: 'uppercase', color: 'var(--text-muted)',
+                    }}>Sin compromiso · Sin tarjeta</span>
+                  </>
+                )}
               </div>
             </form>
           </Reveal>
-        )}
 
         {/* trust badges */}
         <Reveal dir="fade" delay={300}>

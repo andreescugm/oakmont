@@ -129,8 +129,8 @@ img { display: block; max-width: 100%; }
 }
 /* ── Mobile carousel: arrows + dots (desktop: hidden) ── */
 .mc-wrapper { position: relative; }
-.mc-arrows  { display: none; }
 .mc-dots    { display: none; }
+.car-arrows { display: none; }
 
 @media (max-width: 768px) {
   /* ── Carousel container ── */
@@ -168,7 +168,9 @@ img { display: block; max-width: 100%; }
     justify-content: space-between !important;
     padding: 28px !important;
     margin-bottom: 0 !important;
-    border-top: 2px solid transparent;
+    background: var(--bg-raised) !important;
+    border: 1px solid var(--border-soft) !important;
+    border-radius: 12px !important;
   }
 
   /* ── Description clamp ── */
@@ -181,31 +183,45 @@ img { display: block; max-width: 100%; }
     line-height: 1.7 !important;
   }
 
-  /* ── Navigation arrows ── */
-  .mc-arrows {
+  /* ── CarouselArrows (absolute top-right of section) ── */
+  .car-arrows {
     display: flex;
-    justify-content: flex-end;
+    position: absolute;
+    top: 60px;
+    right: 24px;
     gap: 8px;
-    padding: 0 24px 14px;
+    z-index: 10;
   }
-  .mc-arrow {
+  .car-arrow {
     width: 36px;
     height: 36px;
     border-radius: 50%;
     border: 1px solid var(--border-soft);
     background: var(--bg-raised);
-    color: var(--text-secondary);
+    color: var(--copper-soft);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: border-color 0.2s, color 0.2s;
+    transition: border-color 0.2s;
     flex-shrink: 0;
   }
-  .mc-arrow:hover {
-    border-color: var(--copper);
-    color: var(--copper-soft);
+  .car-arrow:hover { border-color: var(--copper); }
+
+  /* ── Metrics cards on mobile ── */
+  .metrics-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+    padding: 20px !important;
   }
+  .metrics-card {
+    background: var(--bg-raised) !important;
+    border: 1px solid var(--border-soft) !important;
+    border-radius: 12px !important;
+    border-right: none !important;
+  }
+  .metrics-num { color: var(--copper-soft) !important; }
+  .metrics-label { color: var(--text-muted) !important; }
 
   /* ── Dots ── */
   .mc-dots {
