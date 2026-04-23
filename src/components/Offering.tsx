@@ -45,7 +45,7 @@ export default function Offering() {
           </h2>
         </Reveal>
 
-        <div style={{
+        <div className="mobile-carousel" style={{
           display: 'grid', gridTemplateColumns: '1fr 1fr',
           gap: 1, background: 'var(--border-subtle)',
           border: '1px solid var(--border-subtle)',

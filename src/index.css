@@ -127,3 +127,21 @@ img { display: block; max-width: 100%; }
     column-count: 2 !important;
   }
 }
+@media (max-width: 768px) {
+  .mobile-carousel {
+    display: flex !important;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    gap: 16px;
+    padding: 0 24px 20px;
+    grid-template-columns: unset !important;
+    column-count: unset !important;
+  }
+  .mobile-carousel > * {
+    flex: 0 0 85%;
+    scroll-snap-align: center;
+    break-inside: auto !important;
+  }
+  .mobile-carousel::-webkit-scrollbar { display: none; }
+}

@@ -161,7 +161,7 @@ export default function Testimonials() {
         </Reveal>
       </div>
 
-      <div style={{
+      <div className="mobile-carousel" style={{
         maxWidth: 1200, margin: '0 auto', padding: '0 48px',
         columnCount: 3, columnGap: 18, position: 'relative', zIndex: 1,
       }}>
