@@ -1,4 +1,5 @@
 import Reveal from './Reveal'
+import MobileCarousel from './MobileCarousel'
 
 const cells = [
   { num: '01 · Tiempo', title: 'Tiempo recuperado', body: <>Las horas que tu equipo gasta en tareas repetitivas vuelven a estar disponibles para lo que genera ingresos. <strong style={{ color: 'var(--copper-soft)', fontWeight: 500 }}>Cualificación, seguimiento, atención inicial — automatizados.</strong></> },
@@ -33,7 +34,7 @@ export default function Deliverables() {
           </h2>
         </Reveal>
 
-        <div className="mobile-carousel" style={{
+        <MobileCarousel count={cells.length} style={{
           display: 'grid', gridTemplateColumns: '1fr 1fr',
           gap: 1, background: 'var(--border-subtle)', border: '1px solid var(--border-subtle)',
           maxWidth: 1000, margin: '0 auto 56px',
@@ -41,7 +42,7 @@ export default function Deliverables() {
           {cells.map((c, i) => (
             <Reveal key={i} dir="up" delay={i * 70}>
               <div
-                style={{ background: 'var(--bg-base)', padding: '40px 38px', position: 'relative', transition: 'background 0.2s' }}
+                style={{ background: 'var(--bg-base)', padding: '40px 38px', position: 'relative', transition: 'background 0.2s', height: '100%' }}
                 onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'var(--bg-surface)'}
                 onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'var(--bg-base)'}
               >
@@ -71,7 +72,7 @@ export default function Deliverables() {
               </div>
             </Reveal>
           ))}
-        </div>
+        </MobileCarousel>
 
         <div style={{ textAlign: 'center' }}>
           <Reveal dir="up">

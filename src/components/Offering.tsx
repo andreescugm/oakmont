@@ -1,4 +1,5 @@
 import Reveal from './Reveal'
+import MobileCarousel from './MobileCarousel'
 
 const cards = [
   { num: 1, tag: 'F · 01', title: 'Diagnóstico Estratégico', titleEm: '60 min', body: 'Identificamos los 3 procesos que más tiempo consumen y calculamos el impacto exacto de automatizarlos. Sin humo. Sin venta disfrazada de consultoría.', link: '#diagnostico', linkText: 'Reservar sesión →' },
@@ -45,7 +46,7 @@ export default function Offering() {
           </h2>
         </Reveal>
 
-        <div className="mobile-carousel" style={{
+        <MobileCarousel count={cards.length} style={{
           display: 'grid', gridTemplateColumns: '1fr 1fr',
           gap: 1, background: 'var(--border-subtle)',
           border: '1px solid var(--border-subtle)',
@@ -53,7 +54,7 @@ export default function Offering() {
           {cards.map((c, i) => (
             <Reveal key={i} dir="up" delay={i * 60}>
               <div
-                style={{ background: 'var(--bg-base)', padding: '40px 38px', position: 'relative', overflow: 'hidden', transition: 'background 0.25s ease' }}
+                style={{ background: 'var(--bg-base)', padding: '40px 38px', position: 'relative', overflow: 'hidden', transition: 'background 0.25s ease', height: '100%' }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-surface)' }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--bg-base)' }}
               >
@@ -107,7 +108,7 @@ export default function Offering() {
               </div>
             </Reveal>
           ))}
-        </div>
+        </MobileCarousel>
       </div>
     </section>
   )

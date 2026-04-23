@@ -1,4 +1,5 @@
 import Reveal from './Reveal'
+import MobileCarousel from './MobileCarousel'
 
 interface Review {
   featured?: boolean
@@ -161,12 +162,12 @@ export default function Testimonials() {
         </Reveal>
       </div>
 
-      <div className="mobile-carousel" style={{
+      <MobileCarousel count={reviews.length} style={{
         maxWidth: 1200, margin: '0 auto', padding: '0 48px',
         columnCount: 3, columnGap: 18, position: 'relative', zIndex: 1,
       }}>
         {reviews.map((r, i) => <Card key={i} r={r} delay={i * 40} />)}
-      </div>
+      </MobileCarousel>
     </section>
   )
 }

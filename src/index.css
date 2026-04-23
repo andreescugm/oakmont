@@ -127,7 +127,13 @@ img { display: block; max-width: 100%; }
     column-count: 2 !important;
   }
 }
+/* ── Mobile carousel: arrows + dots (desktop: hidden) ── */
+.mc-wrapper { position: relative; }
+.mc-arrows  { display: none; }
+.mc-dots    { display: none; }
+
 @media (max-width: 768px) {
+  /* ── Carousel container ── */
   .mobile-carousel {
     display: flex !important;
     overflow-x: auto;
@@ -137,11 +143,108 @@ img { display: block; max-width: 100%; }
     padding: 0 24px 20px;
     grid-template-columns: unset !important;
     column-count: unset !important;
-  }
-  .mobile-carousel > * {
-    flex: 0 0 85%;
-    scroll-snap-align: center;
-    break-inside: auto !important;
+    background: transparent !important;
+    border: none !important;
   }
   .mobile-carousel::-webkit-scrollbar { display: none; }
+
+  /* ── Slides (Reveal wrappers) ── */
+  .mobile-carousel > * {
+    flex: 0 0 85% !important;
+    scroll-snap-align: center;
+    break-inside: auto !important;
+    min-height: 340px;
+    display: flex !important;
+    flex-direction: column !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* ── Card inner div ── */
+  .mobile-carousel > * > div {
+    flex: 1;
+    min-height: 340px;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+    padding: 28px !important;
+    margin-bottom: 0 !important;
+    border-top: 2px solid transparent;
+  }
+
+  /* ── Description clamp ── */
+  .mobile-carousel p {
+    display: -webkit-box !important;
+    -webkit-line-clamp: 5;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 15px !important;
+    line-height: 1.7 !important;
+  }
+
+  /* ── Navigation arrows ── */
+  .mc-arrows {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 0 24px 14px;
+  }
+  .mc-arrow {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--border-soft);
+    background: var(--bg-raised);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    flex-shrink: 0;
+  }
+  .mc-arrow:hover {
+    border-color: var(--copper);
+    color: var(--copper-soft);
+  }
+
+  /* ── Dots ── */
+  .mc-dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    padding: 16px 0 0;
+  }
+  .mc-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--border-mid);
+    transition: background 0.25s;
+    display: block;
+  }
+  .mc-dot-active {
+    background: var(--copper);
+  }
+
+  /* ── Global mobile spacing ── */
+  section {
+    padding-top: 64px !important;
+    padding-bottom: 64px !important;
+  }
+  h2 {
+    font-size: clamp(32px, 8vw, 44px) !important;
+    margin-bottom: 32px !important;
+  }
+  p {
+    font-size: 15px !important;
+    line-height: 1.7 !important;
+  }
+
+  /* ── Form mobile ── */
+  form { gap: 18px !important; }
+  form input, form textarea {
+    padding: 14px !important;
+    font-size: 15px !important;
+  }
+  form > div[style] { gap: 14px !important; }
 }
