@@ -1,40 +1,8 @@
-import { useState } from 'react'
+import { useForm, ValidationError } from '@formspree/react'
 import Reveal from './Reveal'
 
 export default function ContactForm() {
-  const [form, setForm] = useState({ nombre: '', email: '', empresa: '', telefono: '', mensaje: '' })
-  const [enviado, setEnviado] = useState(false)
-
-  const handle = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-    setForm(f => ({ ...f, [e.target.name]: e.target.value }))
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    const formData = new FormData(e.currentTarget)
-
-    const nombre = formData.get('nombre') as string
-    const email = formData.get('email') as string
-
-    if (!nombre || !email) return
-
-    try {
-      const response = await fetch('https://formspree.io/f/myklaqoe', {
-        method: 'POST',
-        body: formData,
-      })
-
-      if (response.ok) {
-        setEnviado(true)
-        setTimeout(() => {
-          setEnviado(false)
-          setForm({ nombre: '', email: '', empresa: '', telefono: '', mensaje: '' })
-          ;(e.target as HTMLFormElement).reset()
-        }, 5000)
-      }
-    } catch (err) {
-      console.error('Form error:', err)
-    }
-  }
+  const [state, handleSubmit] = useForm('myklaqoe')
 
   const fieldStyle: React.CSSProperties = {
     width: '100%',
@@ -122,6 +90,19 @@ export default function ContactForm() {
         </Reveal>
 
         <Reveal dir="up" delay={200}>
+          {state.succeeded ? (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 12,
+              background: 'var(--bg-raised)', border: '1px solid var(--border-mid)',
+              padding: '14px 24px',
+            }}>
+              <span style={{ color: 'var(--copper-soft)', fontSize: 16 }}>✓</span>
+              <span style={{
+                fontFamily: 'var(--font-caps)', fontSize: 7.5, fontWeight: 600,
+                letterSpacing: 2, textTransform: 'uppercase', color: 'var(--text-secondary)',
+              }}>Solicitud recibida. Te contactaremos en menos de 24 horas.</span>
+            </div>
+          ) : (
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
               {/* nombre + empresa */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
@@ -129,7 +110,6 @@ export default function ContactForm() {
                   <label style={labelStyle} htmlFor="nombre">Nombre *</label>
                   <input
                     id="nombre" name="nombre" required
-                    value={form.nombre} onChange={handle}
                     placeholder="Tu nombre"
                     style={fieldStyle}
                     onFocus={e => { e.currentTarget.style.borderColor = 'var(--copper)' }}
@@ -140,7 +120,6 @@ export default function ContactForm() {
                   <label style={labelStyle} htmlFor="empresa">Empresa *</label>
                   <input
                     id="empresa" name="empresa" required
-                    value={form.empresa} onChange={handle}
                     placeholder="Nombre de tu empresa"
                     style={fieldStyle}
                     onFocus={e => { e.currentTarget.style.borderColor = 'var(--copper)' }}
@@ -155,18 +134,17 @@ export default function ContactForm() {
                   <label style={labelStyle} htmlFor="email">Email *</label>
                   <input
                     id="email" name="email" type="email" required
-                    value={form.email} onChange={handle}
                     placeholder="tu@empresa.com"
                     style={fieldStyle}
                     onFocus={e => { e.currentTarget.style.borderColor = 'var(--copper)' }}
                     onBlur={e => { e.currentTarget.style.borderColor = 'var(--border-mid)' }}
                   />
+                  <ValidationError prefix="Email" field="email" errors={state.errors} />
                 </div>
                 <div>
                   <label style={labelStyle} htmlFor="telefono">Teléfono</label>
                   <input
                     id="telefono" name="telefono" type="tel"
-                    value={form.telefono} onChange={handle}
                     placeholder="+34 600 000 000"
                     style={fieldStyle}
                     onFocus={e => { e.currentTarget.style.borderColor = 'var(--copper)' }}
@@ -180,7 +158,6 @@ export default function ContactForm() {
                 <label style={labelStyle} htmlFor="mensaje">Cuéntanos tu situación</label>
                 <textarea
                   id="mensaje" name="mensaje"
-                  value={form.mensaje} onChange={handle}
                   rows={5}
                   placeholder="¿Cuál es el mayor cuello de botella operativo en tu empresa ahora mismo?"
                   style={{ ...fieldStyle, resize: 'vertical', lineHeight: 1.7 }}
@@ -191,43 +168,30 @@ export default function ContactForm() {
 
               {/* submit */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 28, flexWrap: 'wrap', minHeight: 52 }}>
-                {enviado ? (
-                  <div style={{
-                    display: 'flex', alignItems: 'center', gap: 12,
-                    background: 'var(--bg-raised)', border: '1px solid var(--border-mid)',
-                    padding: '14px 24px',
-                  }}>
-                    <span style={{ color: 'var(--copper-soft)', fontSize: 16 }}>✓</span>
-                    <span style={{
-                      fontFamily: 'var(--font-caps)', fontSize: 7.5, fontWeight: 600,
-                      letterSpacing: 2, textTransform: 'uppercase', color: 'var(--text-secondary)',
-                    }}>Solicitud recibida. Te contactaremos en menos de 24 horas.</span>
-                  </div>
-                ) : (
-                  <>
-                    <button
-                      type="submit"
-                      style={{
-                        fontFamily: 'var(--font-caps)', fontSize: 8.5, fontWeight: 600,
-                        letterSpacing: 2.5, textTransform: 'uppercase',
-                        background: 'var(--copper)', color: '#fff',
-                        padding: '15px 40px', border: 'none', cursor: 'pointer',
-                        transition: 'background 0.22s, transform 0.15s',
-                      }}
-                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#a86830'; (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)' }}
-                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--copper)'; (e.currentTarget as HTMLElement).style.transform = 'none' }}
-                    >
-                      Reservar diagnóstico gratuito →
-                    </button>
-                    <span style={{
-                      fontFamily: 'var(--font-caps)', fontSize: 6.5, fontWeight: 400,
-                      letterSpacing: 2, textTransform: 'uppercase', color: 'var(--text-muted)',
-                    }}>Sin compromiso · Sin tarjeta</span>
-                  </>
-                )}
+                <button
+                  type="submit"
+                  disabled={state.submitting}
+                  style={{
+                    fontFamily: 'var(--font-caps)', fontSize: 8.5, fontWeight: 600,
+                    letterSpacing: 2.5, textTransform: 'uppercase',
+                    background: 'var(--copper)', color: '#fff',
+                    padding: '15px 40px', border: 'none', cursor: state.submitting ? 'not-allowed' : 'pointer',
+                    opacity: state.submitting ? 0.7 : 1,
+                    transition: 'background 0.22s, transform 0.15s',
+                  }}
+                  onMouseEnter={e => { if (!state.submitting) { (e.currentTarget as HTMLElement).style.background = '#a86830'; (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)' } }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--copper)'; (e.currentTarget as HTMLElement).style.transform = 'none' }}
+                >
+                  {state.submitting ? 'Enviando...' : 'Reservar diagnóstico gratuito →'}
+                </button>
+                <span style={{
+                  fontFamily: 'var(--font-caps)', fontSize: 6.5, fontWeight: 400,
+                  letterSpacing: 2, textTransform: 'uppercase', color: 'var(--text-muted)',
+                }}>Sin compromiso · Sin tarjeta</span>
               </div>
             </form>
-          </Reveal>
+          )}
+        </Reveal>
 
         {/* trust badges */}
         <Reveal dir="fade" delay={300}>
