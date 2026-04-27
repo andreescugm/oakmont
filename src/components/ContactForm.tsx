@@ -1,8 +1,30 @@
-import { useForm, ValidationError } from '@formspree/react'
+import { useState } from 'react'
 import Reveal from './Reveal'
 
 export default function ContactForm() {
-  const [state, handleSubmit] = useForm('myklaqoe')
+  const [enviado, setEnviado] = useState(false)
+  const [enviando, setEnviando] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setEnviando(true)
+    const formData = new FormData(e.currentTarget)
+    formData.append('access_key', 'cb26723b-26a6-4c3b-853c-f2d6102fcdc9')
+
+    const res = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      body: formData,
+    })
+
+    setEnviando(false)
+    if (res.ok) {
+      setEnviado(true)
+      setTimeout(() => {
+        setEnviado(false)
+        ;(e.target as HTMLFormElement).reset()
+      }, 5000)
+    }
+  }
 
   const fieldStyle: React.CSSProperties = {
     width: '100%',
@@ -90,107 +112,109 @@ export default function ContactForm() {
         </Reveal>
 
         <Reveal dir="up" delay={200}>
-          {state.succeeded ? (
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: 12,
-              background: 'var(--bg-raised)', border: '1px solid var(--border-mid)',
-              padding: '14px 24px',
-            }}>
-              <span style={{ color: 'var(--copper-soft)', fontSize: 16 }}>✓</span>
-              <span style={{
-                fontFamily: 'var(--font-caps)', fontSize: 7.5, fontWeight: 600,
-                letterSpacing: 2, textTransform: 'uppercase', color: 'var(--text-secondary)',
-              }}>Solicitud recibida. Te contactaremos en menos de 24 horas.</span>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
-              {/* nombre + empresa */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-                <div>
-                  <label style={labelStyle} htmlFor="nombre">Nombre *</label>
-                  <input
-                    id="nombre" name="nombre" required
-                    placeholder="Tu nombre"
-                    style={fieldStyle}
-                    onFocus={e => { e.currentTarget.style.borderColor = 'var(--copper)' }}
-                    onBlur={e => { e.currentTarget.style.borderColor = 'var(--border-mid)' }}
-                  />
-                </div>
-                <div>
-                  <label style={labelStyle} htmlFor="empresa">Empresa *</label>
-                  <input
-                    id="empresa" name="empresa" required
-                    placeholder="Nombre de tu empresa"
-                    style={fieldStyle}
-                    onFocus={e => { e.currentTarget.style.borderColor = 'var(--copper)' }}
-                    onBlur={e => { e.currentTarget.style.borderColor = 'var(--border-mid)' }}
-                  />
-                </div>
-              </div>
-
-              {/* email + teléfono */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-                <div>
-                  <label style={labelStyle} htmlFor="email">Email *</label>
-                  <input
-                    id="email" name="email" type="email" required
-                    placeholder="tu@empresa.com"
-                    style={fieldStyle}
-                    onFocus={e => { e.currentTarget.style.borderColor = 'var(--copper)' }}
-                    onBlur={e => { e.currentTarget.style.borderColor = 'var(--border-mid)' }}
-                  />
-                  <ValidationError prefix="Email" field="email" errors={state.errors} />
-                </div>
-                <div>
-                  <label style={labelStyle} htmlFor="telefono">Teléfono</label>
-                  <input
-                    id="telefono" name="telefono" type="tel"
-                    placeholder="+34 600 000 000"
-                    style={fieldStyle}
-                    onFocus={e => { e.currentTarget.style.borderColor = 'var(--copper)' }}
-                    onBlur={e => { e.currentTarget.style.borderColor = 'var(--border-mid)' }}
-                  />
-                </div>
-              </div>
-
-              {/* mensaje */}
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+            {/* nombre + empresa */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
               <div>
-                <label style={labelStyle} htmlFor="mensaje">Cuéntanos tu situación</label>
-                <textarea
-                  id="mensaje" name="mensaje"
-                  rows={5}
-                  placeholder="¿Cuál es el mayor cuello de botella operativo en tu empresa ahora mismo?"
-                  style={{ ...fieldStyle, resize: 'vertical', lineHeight: 1.7 }}
+                <label style={labelStyle} htmlFor="nombre">Nombre *</label>
+                <input
+                  id="nombre" name="nombre" required
+                  placeholder="Tu nombre"
+                  style={fieldStyle}
                   onFocus={e => { e.currentTarget.style.borderColor = 'var(--copper)' }}
                   onBlur={e => { e.currentTarget.style.borderColor = 'var(--border-mid)' }}
                 />
               </div>
-
-              {/* submit */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 28, flexWrap: 'wrap', minHeight: 52 }}>
-                <button
-                  type="submit"
-                  disabled={state.submitting}
-                  style={{
-                    fontFamily: 'var(--font-caps)', fontSize: 8.5, fontWeight: 600,
-                    letterSpacing: 2.5, textTransform: 'uppercase',
-                    background: 'var(--copper)', color: '#fff',
-                    padding: '15px 40px', border: 'none', cursor: state.submitting ? 'not-allowed' : 'pointer',
-                    opacity: state.submitting ? 0.7 : 1,
-                    transition: 'background 0.22s, transform 0.15s',
-                  }}
-                  onMouseEnter={e => { if (!state.submitting) { (e.currentTarget as HTMLElement).style.background = '#a86830'; (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)' } }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--copper)'; (e.currentTarget as HTMLElement).style.transform = 'none' }}
-                >
-                  {state.submitting ? 'Enviando...' : 'Reservar diagnóstico gratuito →'}
-                </button>
-                <span style={{
-                  fontFamily: 'var(--font-caps)', fontSize: 6.5, fontWeight: 400,
-                  letterSpacing: 2, textTransform: 'uppercase', color: 'var(--text-muted)',
-                }}>Sin compromiso · Sin tarjeta</span>
+              <div>
+                <label style={labelStyle} htmlFor="empresa">Empresa *</label>
+                <input
+                  id="empresa" name="empresa" required
+                  placeholder="Nombre de tu empresa"
+                  style={fieldStyle}
+                  onFocus={e => { e.currentTarget.style.borderColor = 'var(--copper)' }}
+                  onBlur={e => { e.currentTarget.style.borderColor = 'var(--border-mid)' }}
+                />
               </div>
-            </form>
-          )}
+            </div>
+
+            {/* email + teléfono */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+              <div>
+                <label style={labelStyle} htmlFor="email">Email *</label>
+                <input
+                  id="email" name="email" type="email" required
+                  placeholder="tu@empresa.com"
+                  style={fieldStyle}
+                  onFocus={e => { e.currentTarget.style.borderColor = 'var(--copper)' }}
+                  onBlur={e => { e.currentTarget.style.borderColor = 'var(--border-mid)' }}
+                />
+              </div>
+              <div>
+                <label style={labelStyle} htmlFor="telefono">Teléfono</label>
+                <input
+                  id="telefono" name="telefono" type="tel"
+                  placeholder="+34 600 000 000"
+                  style={fieldStyle}
+                  onFocus={e => { e.currentTarget.style.borderColor = 'var(--copper)' }}
+                  onBlur={e => { e.currentTarget.style.borderColor = 'var(--border-mid)' }}
+                />
+              </div>
+            </div>
+
+            {/* mensaje */}
+            <div>
+              <label style={labelStyle} htmlFor="mensaje">Cuéntanos tu situación</label>
+              <textarea
+                id="mensaje" name="mensaje"
+                rows={5}
+                placeholder="¿Cuál es el mayor cuello de botella operativo en tu empresa ahora mismo?"
+                style={{ ...fieldStyle, resize: 'vertical', lineHeight: 1.7 }}
+                onFocus={e => { e.currentTarget.style.borderColor = 'var(--copper)' }}
+                onBlur={e => { e.currentTarget.style.borderColor = 'var(--border-mid)' }}
+              />
+            </div>
+
+            {/* submit */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 28, flexWrap: 'wrap', minHeight: 52 }}>
+              {enviado ? (
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  background: 'var(--bg-raised)', border: '1px solid var(--border-mid)',
+                  padding: '14px 24px',
+                }}>
+                  <span style={{ color: 'var(--copper-soft)', fontSize: 16 }}>✓</span>
+                  <span style={{
+                    fontFamily: 'var(--font-caps)', fontSize: 7.5, fontWeight: 600,
+                    letterSpacing: 2, textTransform: 'uppercase', color: 'var(--text-secondary)',
+                  }}>Solicitud recibida. Te contactaremos en menos de 24 horas.</span>
+                </div>
+              ) : (
+                <>
+                  <button
+                    type="submit"
+                    disabled={enviando}
+                    style={{
+                      fontFamily: 'var(--font-caps)', fontSize: 8.5, fontWeight: 600,
+                      letterSpacing: 2.5, textTransform: 'uppercase',
+                      background: 'var(--copper)', color: '#fff',
+                      padding: '15px 40px', border: 'none',
+                      cursor: enviando ? 'not-allowed' : 'pointer',
+                      opacity: enviando ? 0.7 : 1,
+                      transition: 'background 0.22s, transform 0.15s',
+                    }}
+                    onMouseEnter={e => { if (!enviando) { (e.currentTarget as HTMLElement).style.background = '#a86830'; (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)' } }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--copper)'; (e.currentTarget as HTMLElement).style.transform = 'none' }}
+                  >
+                    {enviando ? 'Enviando...' : 'Reservar diagnóstico gratuito →'}
+                  </button>
+                  <span style={{
+                    fontFamily: 'var(--font-caps)', fontSize: 6.5, fontWeight: 400,
+                    letterSpacing: 2, textTransform: 'uppercase', color: 'var(--text-muted)',
+                  }}>Sin compromiso · Sin tarjeta</span>
+                </>
+              )}
+            </div>
+          </form>
         </Reveal>
 
         {/* trust badges */}
