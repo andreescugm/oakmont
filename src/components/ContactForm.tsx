@@ -8,21 +8,37 @@ export default function ContactForm() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setEnviando(true)
-    const formData = new FormData(e.currentTarget)
-    formData.append('access_key', 'cb26723b-26a6-4c3b-853c-f2d6102fcdc9')
+    const fd = new FormData(e.currentTarget)
 
-    const res = await fetch('https://api.web3forms.com/submit', {
-      method: 'POST',
-      body: formData,
-    })
+    const payload = {
+      access_key: 'cb26723b-26a6-4c3b-853c-f2d6102fcdc9',
+      name: fd.get('nombre') as string,
+      email: fd.get('email') as string,
+      telefono: fd.get('telefono') as string,
+      empresa: fd.get('empresa') as string,
+      mensaje: fd.get('mensaje') as string,
+    }
 
-    setEnviando(false)
-    if (res.ok) {
-      setEnviado(true)
-      setTimeout(() => {
-        setEnviado(false)
-        ;(e.target as HTMLFormElement).reset()
-      }, 5000)
+    try {
+      const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      const data = await res.json()
+      setEnviando(false)
+      if (data.success) {
+        setEnviado(true)
+        setTimeout(() => {
+          setEnviado(false)
+          ;(e.target as HTMLFormElement).reset()
+        }, 5000)
+      } else {
+        console.error('Web3Forms error:', data)
+      }
+    } catch (err) {
+      setEnviando(false)
+      console.error('Submit error:', err)
     }
   }
 
