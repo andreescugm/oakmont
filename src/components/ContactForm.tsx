@@ -8,15 +8,32 @@ export default function ContactForm() {
   const handle = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm(f => ({ ...f, [e.target.name]: e.target.value }))
 
-  const submit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    const data = new FormData(e.currentTarget)
-    if (!data.get('nombre') || !data.get('email')) return
-    setEnviado(true)
-    setTimeout(() => {
-      setEnviado(false)
-      setForm({ nombre: '', email: '', empresa: '', telefono: '', mensaje: '' })
-    }, 5000)
+    const formData = new FormData(e.currentTarget)
+
+    const nombre = formData.get('nombre') as string
+    const email = formData.get('email') as string
+
+    if (!nombre || !email) return
+
+    try {
+      const response = await fetch('https://formspree.io/f/myklaqoe', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (response.ok) {
+        setEnviado(true)
+        setTimeout(() => {
+          setEnviado(false)
+          setForm({ nombre: '', email: '', empresa: '', telefono: '', mensaje: '' })
+          ;(e.target as HTMLFormElement).reset()
+        }, 5000)
+      }
+    } catch (err) {
+      console.error('Form error:', err)
+    }
   }
 
   const fieldStyle: React.CSSProperties = {
@@ -105,7 +122,7 @@ export default function ContactForm() {
         </Reveal>
 
         <Reveal dir="up" delay={200}>
-            <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
               {/* nombre + empresa */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                 <div>
@@ -184,7 +201,7 @@ export default function ContactForm() {
                     <span style={{
                       fontFamily: 'var(--font-caps)', fontSize: 7.5, fontWeight: 600,
                       letterSpacing: 2, textTransform: 'uppercase', color: 'var(--text-secondary)',
-                    }}>Mensaje recibido. Te contactaremos en menos de 24 horas.</span>
+                    }}>Solicitud recibida. Te contactaremos en menos de 24 horas.</span>
                   </div>
                 ) : (
                   <>
