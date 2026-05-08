@@ -5,41 +5,47 @@ export default function ContactForm() {
   const [enviado, setEnviado] = useState(false)
   const [enviando, setEnviando] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setEnviando(true)
-    const fd = new FormData(e.currentTarget)
+    const form = e.currentTarget
+    const fd = new FormData(form)
 
-    const payload = {
-      access_key: 'cb26723b-26a6-4c3b-853c-f2d6102fcdc9',
-      name: fd.get('nombre') as string,
-      email: fd.get('email') as string,
-      telefono: fd.get('telefono') as string,
-      empresa: fd.get('empresa') as string,
-      mensaje: fd.get('mensaje') as string,
-    }
+    const nombre = (fd.get('nombre') as string || '').trim()
+    const empresa = (fd.get('empresa') as string || '').trim()
+    const email = (fd.get('email') as string || '').trim()
+    const telefono = (fd.get('telefono') as string || '').trim()
+    const mensaje = (fd.get('mensaje') as string || '').trim()
 
-    try {
-      const res = await fetch('https://api.web3forms.com/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-      const data = await res.json()
+    const subject = `Diagnóstico solicitado · ${empresa || nombre || 'Nuevo contacto'}`
+    const bodyLines = [
+      `Nombre: ${nombre}`,
+      `Empresa: ${empresa}`,
+      `Email: ${email}`,
+      `Teléfono: ${telefono}`,
+      ``,
+      `Mensaje:`,
+      mensaje,
+      ``,
+      `—`,
+      `Enviado desde andreescuoakmont.com`,
+    ]
+    const body = bodyLines.join('\r\n')
+
+    const mailto = `mailto:andreescugm@proton.me?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+
+    // Abre el cliente de correo del usuario
+    window.location.href = mailto
+
+    // Pequeño delay para que el navegador procese el mailto antes de mostrar la confirmación
+    setTimeout(() => {
       setEnviando(false)
-      if (data.success) {
-        setEnviado(true)
-        setTimeout(() => {
-          setEnviado(false)
-          ;(e.target as HTMLFormElement).reset()
-        }, 5000)
-      } else {
-        console.error('Web3Forms error:', data)
-      }
-    } catch (err) {
-      setEnviando(false)
-      console.error('Submit error:', err)
-    }
+      setEnviado(true)
+      setTimeout(() => {
+        setEnviado(false)
+        form.reset()
+      }, 6000)
+    }, 400)
   }
 
   const fieldStyle: React.CSSProperties = {
