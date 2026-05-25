@@ -50,6 +50,7 @@ export default function App() {
   const [scrollY, setScrollY] = useState(0)
   const [activeSection, setActiveSection] = useState<string | null>(null)
   const savedScrollY = useRef(0)
+  const pendingScroll = useRef<string | null>(null)
 
   useEffect(() => {
     document.documentElement.className = ''
@@ -82,19 +83,36 @@ export default function App() {
       const href = a.getAttribute('href') ?? ''
       if (!href.startsWith('#')) return
       const hash = href.slice(1)
-      if (!HIDDEN_SECTIONS.has(hash)) return
-      e.preventDefault()
-      savedScrollY.current = window.scrollY
-      setActiveSection(hash)
-      window.scrollTo(0, 0)
+      if (HIDDEN_SECTIONS.has(hash)) {
+        e.preventDefault()
+        savedScrollY.current = window.scrollY
+        setActiveSection(hash)
+        window.scrollTo(0, 0)
+      } else if (activeSection !== null) {
+        // Link targets a main-page section (e.g. #contacto) while a
+        // sub-page is open: return to the main page, then scroll there.
+        e.preventDefault()
+        pendingScroll.current = hash
+        setActiveSection(null)
+      }
     }
     document.addEventListener('click', handleClick)
     return () => document.removeEventListener('click', handleClick)
-  }, [])
+  }, [activeSection])
 
   useEffect(() => {
     if (activeSection === null) {
-      window.scrollTo(0, savedScrollY.current)
+      if (pendingScroll.current !== null) {
+        const target = pendingScroll.current
+        pendingScroll.current = null
+        requestAnimationFrame(() => {
+          const el = target ? document.getElementById(target) : null
+          if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+          else window.scrollTo(0, 0)
+        })
+      } else {
+        window.scrollTo(0, savedScrollY.current)
+      }
     } else if (HASH_TO_VIEW[activeSection] === 'services' && activeSection !== 'servicios') {
       requestAnimationFrame(() => {
         const el = document.getElementById(activeSection)
