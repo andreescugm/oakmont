@@ -4,9 +4,11 @@ import Reveal from './Reveal'
 export default function ContactForm() {
   const [enviado, setEnviado] = useState(false)
   const [enviando, setEnviando] = useState(false)
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    setErrorMsg(null)
     setEnviando(true)
     const form = e.currentTarget
     const fd = new FormData(form)
@@ -17,35 +19,49 @@ export default function ContactForm() {
     const telefono = (fd.get('telefono') as string || '').trim()
     const mensaje = (fd.get('mensaje') as string || '').trim()
 
-    const subject = `Diagnóstico solicitado · ${empresa || nombre || 'Nuevo contacto'}`
-    const bodyLines = [
-      `Nombre: ${nombre}`,
-      `Empresa: ${empresa}`,
-      `Email: ${email}`,
-      `Teléfono: ${telefono}`,
-      ``,
-      `Mensaje:`,
-      mensaje,
-      ``,
-      `—`,
-      `Enviado desde andreescuoakmont.com`,
-    ]
-    const body = bodyLines.join('\r\n')
+    const payload = {
+      Nombre: nombre,
+      Empresa: empresa,
+      Email: email,
+      Teléfono: telefono,
+      Mensaje: mensaje,
+      _subject: `Diagnóstico solicitado · ${empresa || nombre || 'Nuevo contacto'}`,
+      _template: 'table',
+      _captcha: 'false',
+    }
 
-    const mailto = `mailto:andreescugm@proton.me?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
-
-    // Abre el cliente de correo del usuario
-    window.location.href = mailto
-
-    // Pequeño delay para que el navegador procese el mailto antes de mostrar la confirmación
-    setTimeout(() => {
+    try {
+      const res = await fetch('https://formsubmit.co/ajax/andreescugm@proton.me', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      const data: Record<string, unknown> = await res.json().catch(() => ({}))
       setEnviando(false)
-      setEnviado(true)
-      setTimeout(() => {
-        setEnviado(false)
-        form.reset()
-      }, 6000)
-    }, 400)
+
+      // Formsubmit responde success: "true" (string) en respuestas OK
+      const ok = res.ok && (data.success === 'true' || data.success === true)
+      if (ok) {
+        setEnviado(true)
+        setTimeout(() => {
+          setEnviado(false)
+          form.reset()
+        }, 6000)
+      } else {
+        const msg =
+          typeof data.message === 'string'
+            ? (data.message as string)
+            : `No se pudo enviar (HTTP ${res.status}). Escríbenos a andreescugm@proton.me`
+        setErrorMsg(msg)
+        console.error('Formsubmit error:', data)
+      }
+    } catch (err) {
+      setEnviando(false)
+      setErrorMsg(
+        'No se pudo enviar por un problema de conexión. Escríbenos a andreescugm@proton.me'
+      )
+      console.error('Submit error:', err)
+    }
   }
 
   const fieldStyle: React.CSSProperties = {
@@ -236,6 +252,20 @@ export default function ContactForm() {
                 </>
               )}
             </div>
+
+            {errorMsg && !enviado && (
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 12,
+                background: 'rgba(180,40,40,0.08)', border: '1px solid rgba(180,40,40,0.4)',
+                padding: '12px 18px',
+              }}>
+                <span style={{ color: '#c04040', fontSize: 14 }}>!</span>
+                <span style={{
+                  fontFamily: 'var(--font-serif)', fontSize: 14, fontWeight: 300,
+                  fontStyle: 'italic', color: 'var(--text-secondary)',
+                }}>{errorMsg}</span>
+              </div>
+            )}
           </form>
         </Reveal>
 
