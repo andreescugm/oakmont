@@ -1,5 +1,9 @@
 import Reveal from './Reveal'
-import type { CSSProperties, ReactNode } from 'react'
+import type { ReactNode } from 'react'
+import tiempoImg from '../assets/deliverable-tiempo.jpg'
+import comercialImg from '../assets/deliverable-comercial.jpg'
+import equipoImg from '../assets/deliverable-equipo.jpg'
+import ventajaImg from '../assets/deliverable-ventaja.jpg'
 
 interface Cell {
   num: string
@@ -7,144 +11,44 @@ interface Cell {
   title: string
   body: ReactNode
   aspect: string
+  image: string
+  imageAlt: string
   span?: number      // 1 o 2 columnas en desktop
   offset?: boolean   // mt-32 estilo Clay
-  visual: 'pulse' | 'flow' | 'grid' | 'arc' | 'wave'
 }
 
 const cells: Cell[] = [
   {
     num: '01 · Tiempo', tag: 'Tiempo recuperado', title: 'Tiempo recuperado',
     body: <>Las horas que tu equipo gasta en tareas repetitivas vuelven a estar disponibles para lo que genera ingresos. <strong style={{ color: 'var(--copper-soft)', fontWeight: 500 }}>Cualificación, seguimiento, atención inicial — automatizados.</strong></>,
-    aspect: '1 / 1', visual: 'pulse',
+    aspect: '1 / 1',
+    image: tiempoImg,
+    imageAlt: 'Reloj de bronce y documentos sobre un escritorio oscuro',
   },
   {
     num: '02 · Comercial', tag: 'Pipeline predecible', title: 'Pipeline predecible',
     body: <>Dejas de depender de referidos y de los meses buenos. <strong style={{ color: 'var(--copper-soft)', fontWeight: 500 }}>Un sistema que genera oportunidades de forma consistente</strong>, con métricas que demuestran que funciona.</>,
-    aspect: '4 / 5', offset: true, visual: 'flow',
+    aspect: '4 / 5',
+    offset: true,
+    image: comercialImg,
+    imageAlt: 'Carpetas de cliente ordenadas en una mesa ejecutiva',
   },
   {
     num: '03 · Equipo', tag: 'Equipo más efectivo', title: 'Equipo más efectivo',
     body: <>Tu equipo deja de hacer trabajo de bajo valor y empieza a operar con herramientas que multiplican su capacidad. <strong style={{ color: 'var(--copper-soft)', fontWeight: 500 }}>Los mismos recursos, resultados distintos.</strong></>,
-    aspect: '16 / 9', span: 2, visual: 'grid',
+    aspect: '16 / 9',
+    span: 2,
+    image: equipoImg,
+    imageAlt: 'Sala de reuniones oscura preparada para trabajo ejecutivo',
   },
   {
     num: '04 · Ventaja', tag: 'Ventaja competitiva real', title: 'Ventaja competitiva real',
     body: <>El 90% de tus competidores no tiene esto implementado. <strong style={{ color: 'var(--copper-soft)', fontWeight: 500 }}>Cuando tú sí lo tienes, la diferencia es visible</strong> antes de abrir la boca en una reunión.</>,
-    aspect: '1 / 1', visual: 'arc',
+    aspect: '1 / 1',
+    image: ventajaImg,
+    imageAlt: 'Carpeta marfil iluminada entre documentos oscuros',
   },
 ]
-
-// Visuales CSS-art para cada card — sin imágenes externas
-function Visual({ kind }: { kind: Cell['visual'] }) {
-  const base: CSSProperties = {
-    position: 'absolute', inset: 0,
-    background: 'linear-gradient(135deg, var(--bg-card) 0%, var(--bg-raised) 100%)',
-    overflow: 'hidden',
-  }
-
-  if (kind === 'pulse') {
-    // anillos concéntricos
-    return (
-      <div style={base}>
-        {[1, 2, 3, 4].map(i => (
-          <div key={i} style={{
-            position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
-            width: `${i * 90}px`, height: `${i * 90}px`,
-            borderRadius: '50%',
-            border: `1px solid var(--copper-dim)`,
-            opacity: 0.6 - i * 0.1,
-            animation: `drift ${10 + i * 2}s ease-in-out infinite alternate`,
-            animationDelay: `${-i * 1.5}s`,
-          }} />
-        ))}
-        <div style={{
-          position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
-          width: 14, height: 14, borderRadius: '50%',
-          background: 'var(--copper)',
-          boxShadow: '0 0 24px var(--copper-glow), 0 0 60px var(--copper-glow)',
-        }} />
-      </div>
-    )
-  }
-  if (kind === 'flow') {
-    // líneas diagonales en flujo
-    return (
-      <div style={base}>
-        <svg width="100%" height="100%" viewBox="0 0 400 500" preserveAspectRatio="none" style={{ position: 'absolute', inset: 0 }}>
-          {[0, 1, 2, 3, 4, 5].map(i => (
-            <path
-              key={i}
-              d={`M -20 ${60 + i * 80} Q 200 ${80 + i * 70} 420 ${40 + i * 90}`}
-              stroke="var(--copper-dim)"
-              strokeWidth="1"
-              fill="none"
-              opacity={0.7 - i * 0.08}
-            />
-          ))}
-          <circle cx="200" cy="250" r="6" fill="var(--copper)" opacity="0.9" />
-        </svg>
-      </div>
-    )
-  }
-  if (kind === 'grid') {
-    // grid de puntos
-    return (
-      <div style={base}>
-        <div style={{
-          position: 'absolute', inset: 0,
-          backgroundImage: 'radial-gradient(var(--copper-dim) 1.2px, transparent 1.2px)',
-          backgroundSize: '24px 24px',
-          maskImage: 'radial-gradient(ellipse 80% 70% at 50% 50%, black, transparent)',
-          WebkitMaskImage: 'radial-gradient(ellipse 80% 70% at 50% 50%, black, transparent)',
-        }} />
-        <div style={{
-          position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
-          width: 80, height: 80, borderRadius: '50%',
-          background: 'radial-gradient(circle, var(--copper-glow) 0%, transparent 70%)',
-          filter: 'blur(20px)',
-        }} />
-      </div>
-    )
-  }
-  if (kind === 'arc') {
-    // arcos / parábola
-    return (
-      <div style={base}>
-        <svg width="100%" height="100%" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet" style={{ position: 'absolute', inset: 0 }}>
-          {[200, 160, 120, 80].map((r, i) => (
-            <path
-              key={i}
-              d={`M ${200 - r} 320 A ${r} ${r} 0 0 1 ${200 + r} 320`}
-              stroke="var(--copper-dim)"
-              strokeWidth={i === 0 ? 1.5 : 1}
-              fill="none"
-              opacity={0.85 - i * 0.15}
-            />
-          ))}
-          <line x1="40" y1="320" x2="360" y2="320" stroke="var(--copper)" strokeWidth="1" opacity="0.5" />
-        </svg>
-      </div>
-    )
-  }
-  // wave
-  return (
-    <div style={base}>
-      <svg width="100%" height="100%" viewBox="0 0 800 200" preserveAspectRatio="none" style={{ position: 'absolute', inset: 0 }}>
-        {[0, 1, 2].map(i => (
-          <path
-            key={i}
-            d={`M 0 ${100 + i * 20} Q 200 ${40 + i * 20} 400 ${100 + i * 20} T 800 ${100 + i * 20}`}
-            stroke="var(--copper-dim)"
-            strokeWidth="1"
-            fill="none"
-            opacity={0.7 - i * 0.2}
-          />
-        ))}
-      </svg>
-    </div>
-  )
-}
 
 export default function Deliverables() {
   return (
@@ -234,7 +138,22 @@ export default function Deliverables() {
                   border: '1px solid var(--border-subtle)',
                   background: 'var(--bg-card)',
                 }}>
-                  <Visual kind={c.visual} />
+                  <img
+                    src={c.image}
+                    alt={c.imageAlt}
+                    loading="lazy"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      filter: 'saturate(0.9) contrast(1.04)',
+                    }}
+                  />
+                  <div aria-hidden style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: 'linear-gradient(180deg, rgba(9,11,20,0.08) 0%, rgba(9,11,20,0.46) 100%)',
+                  }} />
                   {/* tag esquina superior */}
                   <span style={{
                     position: 'absolute', top: 22, left: 24,
