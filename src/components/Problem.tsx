@@ -14,7 +14,7 @@ export default function Problem() {
   const [open, setOpen] = useState<number | null>(0)
 
   return (
-    <section id="problema" style={{
+    <section id="proceso" style={{
       background: 'var(--bg-surface)',
       padding: 'clamp(100px,14vh,180px) clamp(24px,6vw,96px)',
       borderTop: '1px solid var(--border-subtle)',

@@ -14,7 +14,7 @@ export default function Offering() {
   const [open, setOpen] = useState<number | null>(0)
 
   return (
-    <section id="solucion" style={{
+    <section id="sistema" style={{
       background: 'var(--bg-base)',
       padding: 'clamp(100px,14vh,180px) clamp(24px,6vw,96px)',
       position: 'relative', overflow: 'hidden',

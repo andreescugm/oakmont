@@ -1,7 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
 
-type Theme = 'dark' | 'light'
-import AnnBar from './components/AnnBar'
 import Nav from './components/Nav'
 import Hero from './components/Hero'
 import Metrics from './components/Metrics'
@@ -43,9 +41,6 @@ const HASH_TO_VIEW: Record<string, SectionView> = {
 }
 
 export default function App() {
-  const [theme, setTheme] = useState<Theme>(() => {
-    return (localStorage.getItem('ao-theme') as Theme) || 'dark'
-  })
   const [scrollPct, setScrollPct] = useState(0)
   const [scrollY, setScrollY] = useState(0)
   const [activeSection, setActiveSection] = useState<string | null>(null)
@@ -54,8 +49,8 @@ export default function App() {
 
   useEffect(() => {
     document.documentElement.className = ''
-    document.documentElement.classList.add(theme)
-  }, [theme])
+    document.documentElement.classList.add('dark')
+  }, [])
 
   useEffect(() => {
     const onScroll = () => {
@@ -121,11 +116,6 @@ export default function App() {
     }
   }, [activeSection])
 
-  const toggle = (t: Theme) => {
-    setTheme(t)
-    localStorage.setItem('ao-theme', t)
-  }
-
   const goBack = () => setActiveSection(null)
 
   const view = activeSection ? HASH_TO_VIEW[activeSection] : null
@@ -133,8 +123,7 @@ export default function App() {
   return (
     <>
       <div id="scroll-bar" style={{ width: `${scrollPct}%` }} />
-      <AnnBar />
-      <Nav theme={theme} onToggle={toggle} scrollY={scrollY} />
+      <Nav scrollY={scrollY} />
       {view ? (
         <>
           <button
