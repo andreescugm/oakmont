@@ -1,93 +1,88 @@
-import { useState } from 'react'
-import type { MouseEvent } from 'react'
+type Theme = 'dark' | 'light'
 
 interface Props {
+  theme: Theme
+  onToggle: (t: Theme) => void
   scrollY: number
 }
 
-const navLinks = [
-  { label: 'Sistema', href: '#sistema' },
-  { label: 'Proceso', href: '#proceso' },
-  { label: 'Garantía', href: '#garantia' },
-  { label: 'Contacto', href: '#contacto' },
-]
-
-const scrollToHash = (href: string) => {
-  const id = href.slice(1)
-  if (!id) {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-    return
-  }
-  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-}
-
-export default function Nav({ scrollY }: Props) {
-  const [menuOpen, setMenuOpen] = useState(false)
-  const elevated = scrollY > 48
-
-  const handleAnchorClick = (href: string) => (event: MouseEvent<HTMLAnchorElement>) => {
-    event.preventDefault()
-    setMenuOpen(false)
-    scrollToHash(href)
-  }
+export default function Nav({ theme, onToggle, scrollY }: Props) {
+  const elevated = scrollY > 60
+  // ann bar is ~34px
+  const annH = 34
+  const top = elevated ? 0 : annH
 
   return (
-    <>
-      <nav className={elevated ? 'ao-nav ao-nav-elevated' : 'ao-nav'} aria-label="Principal">
-        <a className="ao-nav-logo" href="#" onClick={handleAnchorClick('#')}>
-          Andreescu Oakmont
-        </a>
+    <nav style={{
+      position: 'fixed', top, left: 0, right: 0, zIndex: 1000,
+      padding: elevated ? '12px 0' : '14px 0',
+      background: 'var(--nav-bg)',
+      backdropFilter: 'blur(20px) saturate(160%)',
+      WebkitBackdropFilter: 'blur(20px) saturate(160%)',
+      borderBottom: `1px solid ${elevated ? 'var(--border-soft)' : 'var(--border-subtle)'}`,
+      boxShadow: elevated ? '0 1px 32px rgba(0,0,0,0.22)' : 'none',
+      transition: 'all 0.3s ease',
+    }}>
+      <div style={{
+        maxWidth: 1200, margin: '0 auto', padding: '0 48px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      }}>
+        <a href="#" style={{
+          fontFamily: 'var(--font-caps)',
+          fontSize: 17, fontWeight: 600, letterSpacing: 5,
+          textTransform: 'uppercase', color: 'var(--text-primary)',
+          transition: 'color 0.2s',
+        }}>AO</a>
 
-        <div className="ao-nav-links">
-          {navLinks.map((link) => (
-            <a key={link.href} href={link.href} onClick={handleAnchorClick(link.href)}>
-              {link.label}
-            </a>
-          ))}
-        </div>
-
-        <a className="ao-nav-cta" href="#contacto" onClick={handleAnchorClick('#contacto')}>
-          Reservar diagnóstico
-        </a>
-
-        <button
-          className="ao-menu-button"
-          type="button"
-          aria-label="Abrir menú"
-          aria-expanded={menuOpen}
-          onClick={() => setMenuOpen(true)}
-        >
-          <span />
-          <span />
-        </button>
-      </nav>
-
-      {menuOpen && (
-        <div className="ao-mobile-menu" role="dialog" aria-modal="true" aria-label="Menú principal">
-          <div className="ao-mobile-menu-top">
-            <span>Andreescu Oakmont</span>
-            <button type="button" aria-label="Cerrar menú" onClick={() => setMenuOpen(false)}>
-              X
-            </button>
-          </div>
-
-          <div className="ao-mobile-menu-links">
-            {navLinks.map((link) => (
-              <a key={link.href} href={link.href} onClick={handleAnchorClick(link.href)}>
-                {link.label}
-              </a>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          {/* theme toggle */}
+          <div style={{
+            display: 'flex', alignItems: 'center',
+            background: 'var(--bg-raised)',
+            border: '1px solid var(--border-soft)',
+            borderRadius: 100, padding: 3,
+          }}>
+            {(['dark', 'light'] as Theme[]).map((t) => (
+              <button
+                key={t}
+                onClick={() => onToggle(t)}
+                title={t === 'dark' ? 'Modo oscuro' : 'Modo claro'}
+                style={{
+                  width: 30, height: 26, borderRadius: 100,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 13,
+                  background: theme === t ? 'var(--copper-dim)' : 'transparent',
+                  color: theme === t ? 'var(--text-primary)' : 'var(--text-muted)',
+                  transition: 'all 0.22s ease',
+                }}
+              >
+                {t === 'dark' ? '🌙' : '☀️'}
+              </button>
             ))}
           </div>
 
-          <a
-            className="ao-mobile-menu-cta"
-            href="#contacto"
-            onClick={handleAnchorClick('#contacto')}
-          >
-            Reservar diagnóstico
+          <a href="#contacto" style={{
+            fontFamily: 'var(--font-caps)',
+            fontSize: 7.5, fontWeight: 600, letterSpacing: 2.2,
+            textTransform: 'uppercase', color: 'var(--copper-soft)',
+            padding: '10px 20px',
+            border: '1px solid var(--copper-dim)',
+            background: 'var(--copper-glow)',
+            transition: 'all 0.22s ease',
+          }}
+          onClick={e => { e.preventDefault(); document.getElementById('contacto')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }}
+          onMouseEnter={e => {
+            (e.currentTarget as HTMLElement).style.background = 'var(--copper)'
+            ;(e.currentTarget as HTMLElement).style.color = '#fff'
+          }}
+          onMouseLeave={e => {
+            (e.currentTarget as HTMLElement).style.background = 'var(--copper-glow)'
+            ;(e.currentTarget as HTMLElement).style.color = 'var(--copper-soft)'
+          }}>
+            Diagnóstico gratuito
           </a>
         </div>
-      )}
-    </>
+      </div>
+    </nav>
   )
 }
