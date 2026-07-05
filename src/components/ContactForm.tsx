@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import Reveal from './Reveal'
+import { getLeadScore, leadTemperature } from '../leadScore'
 
 export default function ContactForm() {
   const [enviado, setEnviado] = useState(false)
@@ -19,13 +20,16 @@ export default function ContactForm() {
     const telefono = (fd.get('telefono') as string || '').trim()
     const mensaje = (fd.get('mensaje') as string || '').trim()
 
+    const lead = getLeadScore()
     const payload = {
       Nombre: nombre,
       Empresa: empresa,
       Email: email,
       Teléfono: telefono,
       Mensaje: mensaje,
-      _subject: `Diagnóstico solicitado · ${empresa || nombre || 'Nuevo contacto'}`,
+      'Lead score': `${lead.score} pts · ${leadTemperature(lead.score)}`,
+      'Interacciones en la web': lead.actions.length ? lead.actions.join(' · ') : 'ninguna (fue directo al formulario)',
+      _subject: `Diagnóstico solicitado · ${empresa || nombre || 'Nuevo contacto'} · ${leadTemperature(lead.score)}`,
       _template: 'table',
       _captcha: 'false',
     }

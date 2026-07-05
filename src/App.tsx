@@ -1,14 +1,15 @@
 import { useState, useEffect, useRef } from 'react'
 
-type Theme = 'dark' | 'light'
-import AnnBar from './components/AnnBar'
 import Nav from './components/Nav'
+import CursorGlow from './components/CursorGlow'
+import ExitIntent from './components/ExitIntent'
+import WhatsAppFloat from './components/WhatsAppFloat'
 import Hero from './components/Hero'
+import Manifesto from './components/Manifesto'
+import ProofSection from './components/ProofSection'
+import CapabilitiesBento from './components/CapabilitiesBento'
+import PipelineSection from './components/PipelineSection'
 import Metrics from './components/Metrics'
-import Problem from './components/Problem'
-import Offering from './components/Offering'
-import Stats from './components/Stats'
-import Deliverables from './components/Deliverables'
 import Testimonials from './components/Testimonials'
 import Guarantee from './components/Guarantee'
 import FinalCTA from './components/FinalCTA'
@@ -42,9 +43,11 @@ const HASH_TO_VIEW: Record<string, SectionView> = {
   'aviso-legal': 'aviso-legal',
 }
 
+type Theme = 'dark' | 'light'
+
 export default function App() {
   const [theme, setTheme] = useState<Theme>(() => {
-    return (localStorage.getItem('ao-theme') as Theme) || 'dark'
+    return (localStorage.getItem('ao-theme') as Theme) || 'light'
   })
   const [scrollPct, setScrollPct] = useState(0)
   const [scrollY, setScrollY] = useState(0)
@@ -53,9 +56,13 @@ export default function App() {
   const pendingScroll = useRef<string | null>(null)
 
   useEffect(() => {
-    document.documentElement.className = ''
-    document.documentElement.classList.add(theme)
+    document.documentElement.className = theme
   }, [theme])
+
+  const toggle = (t: Theme) => {
+    setTheme(t)
+    localStorage.setItem('ao-theme', t)
+  }
 
   useEffect(() => {
     const onScroll = () => {
@@ -121,19 +128,16 @@ export default function App() {
     }
   }, [activeSection])
 
-  const toggle = (t: Theme) => {
-    setTheme(t)
-    localStorage.setItem('ao-theme', t)
-  }
-
   const goBack = () => setActiveSection(null)
 
   const view = activeSection ? HASH_TO_VIEW[activeSection] : null
 
   return (
     <>
+      <CursorGlow />
+      <ExitIntent />
+      <WhatsAppFloat />
       <div id="scroll-bar" style={{ width: `${scrollPct}%` }} />
-      <AnnBar />
       <Nav theme={theme} onToggle={toggle} scrollY={scrollY} />
       {view ? (
         <>
@@ -176,10 +180,10 @@ export default function App() {
           <main>
             <Hero />
             <Metrics />
-            <Problem />
-            <Offering />
-            <Stats />
-            <Deliverables />
+            <ProofSection />
+            <CapabilitiesBento />
+            <PipelineSection />
+            <Manifesto />
             <Testimonials />
             <Guarantee />
             <ContactForm />

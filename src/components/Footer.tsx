@@ -36,12 +36,12 @@ export default function Footer() {
             fontFamily: 'var(--font-caps)', fontSize: 15, fontWeight: 600,
             letterSpacing: 4, textTransform: 'uppercase',
             color: 'var(--copper-soft)', display: 'block', marginBottom: 5,
-          }}>Andreescu Oakmont</span>
+          }}>Talos Lynx</span>
           <span style={{
             fontFamily: 'var(--font-caps)', fontSize: 6.5, letterSpacing: 2.2,
             textTransform: 'uppercase', color: 'var(--text-muted)',
             display: 'block', marginBottom: 18,
-          }}>Consultoría Estratégica · Automatización IA · Est. 2026</span>
+          }}>Una marca de Andreescu Oakmont S.L. · Automatización IA · Est. 2026</span>
           <p style={{
             fontFamily: 'var(--font-serif)', fontSize: 14, fontWeight: 300,
             fontStyle: 'italic', lineHeight: 1.78, color: 'var(--text-muted)',
@@ -95,7 +95,7 @@ export default function Footer() {
         fontFamily: 'var(--font-caps)', fontSize: 6.5,
         letterSpacing: 1.8, textTransform: 'uppercase', color: 'var(--text-muted)',
       }}>
-        <span>© 2026 Andreescu Oakmont. Todos los derechos reservados.</span>
+        <span>© 2026 Talos Lynx · Andreescu Oakmont S.L. Todos los derechos reservados.</span>
         <div style={{ display: 'flex', gap: 20 }}>
           {legal.map(l => (
             <a key={l.label} href={l.href} style={{ color: 'var(--text-muted)', transition: 'color 0.2s' }}

@@ -8,9 +8,7 @@ interface Props {
 
 export default function Nav({ theme, onToggle, scrollY }: Props) {
   const elevated = scrollY > 60
-  // ann bar is ~34px
-  const annH = 34
-  const top = elevated ? 0 : annH
+  const top = 0
 
   return (
     <nav style={{
@@ -29,20 +27,23 @@ export default function Nav({ theme, onToggle, scrollY }: Props) {
       }}>
         <a href="#" style={{
           fontFamily: 'var(--font-caps)',
-          fontSize: 17, fontWeight: 600, letterSpacing: 5,
+          fontSize: 15, fontWeight: 600, letterSpacing: 4,
           textTransform: 'uppercase', color: 'var(--text-primary)',
           transition: 'color 0.2s',
-        }}>AO</a>
+          display: 'inline-flex', alignItems: 'center', gap: 10,
+        }}>
+          <span className="star-shape" aria-hidden />
+          Talos<span style={{ color: 'var(--copper-soft)' }}>Lynx</span>
+        </a>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          {/* theme toggle */}
           <div style={{
             display: 'flex', alignItems: 'center',
             background: 'var(--bg-raised)',
             border: '1px solid var(--border-soft)',
             borderRadius: 100, padding: 3,
           }}>
-            {(['dark', 'light'] as Theme[]).map((t) => (
+            {(['light', 'dark'] as Theme[]).map((t) => (
               <button
                 key={t}
                 onClick={() => onToggle(t)}
@@ -60,7 +61,6 @@ export default function Nav({ theme, onToggle, scrollY }: Props) {
               </button>
             ))}
           </div>
-
           <a href="#contacto" style={{
             fontFamily: 'var(--font-caps)',
             fontSize: 7.5, fontWeight: 600, letterSpacing: 2.2,
