@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { speak, stopSpeech } from '../speech'
 
 /* ═══════════════════════════════════════════════════════
    BRASA NORTE — web demo completa dentro de la web.
@@ -14,6 +15,7 @@ interface Dish {
   bg: string        // gradiente de fondo de página
   glow: string      // color del halo del plato
   tag: string
+  speech: string    // narración (audio estático pregenerado)
 }
 
 const DISHES: Dish[] = [
@@ -22,30 +24,35 @@ const DISHES: Dish[] = [
     desc: 'Magret madurado 21 días, trufa negra de Soria y reducción de Pedro Ximénez.',
     price: '28 €', emoji: '🦆', tag: 'La firma de la casa',
     bg: 'linear-gradient(160deg, #5d1b26 0%, #2e0d13 100%)', glow: 'rgba(220,90,110,0.35)',
+    speech: 'Magret de pato madurado veintiún días, trufa negra de Soria y reducción de Pedro Ximénez. La firma de la casa.',
   },
   {
     name: 'César de corral',
     desc: 'Pollo de corral a la brasa, parmesano de 24 meses y anchoa del Cantábrico.',
     price: '14 €', emoji: '🥗', tag: 'Fresca y canalla',
     bg: 'linear-gradient(160deg, #24462e 0%, #0f2416 100%)', glow: 'rgba(110,200,140,0.3)',
+    speech: 'Ensalada César con pollo de corral a la brasa, parmesano de veinticuatro meses y anchoa del Cantábrico.',
   },
   {
     name: 'Lechazo 18 horas',
     desc: 'Asado lento sobre brasa de encina. Se corta con cuchara, se recuerda años.',
     price: '24 €', emoji: '🍖', tag: 'El motivo del viaje',
     bg: 'linear-gradient(160deg, #6e4220 0%, #33200e 100%)', glow: 'rgba(212,147,90,0.4)',
+    speech: 'Lechazo asado dieciocho horas a baja temperatura sobre brasa de encina. Se corta con cuchara. El plato por el que se cruza media provincia.',
   },
   {
     name: 'Pulpo a la brasa',
     desc: 'Carbón de encina, pimentón de la Vera y parmentier de patata asada.',
     price: '19 €', emoji: '🐙', tag: 'Fuera crujiente, dentro mantequilla',
     bg: 'linear-gradient(160deg, #123c46 0%, #081e24 100%)', glow: 'rgba(90,190,200,0.32)',
+    speech: 'Pulpo a la brasa con carbón de encina, aceite de oliva virgen y pimentón de la Vera. Fuera crujiente, dentro mantequilla.',
   },
   {
     name: 'Torrija de brioche',
     desc: 'Caramelizada al momento, helado de leche merengada. El final que pide la mesa.',
     price: '8 €', emoji: '🍮', tag: 'No se comparte (avisamos)',
     bg: 'linear-gradient(160deg, #7c5619 0%, #3a290c 100%)', glow: 'rgba(230,180,90,0.35)',
+    speech: 'Torrija de brioche caramelizada al momento, con helado de leche merengada. El final que pide la mesa entera.',
   },
 ]
 
@@ -171,15 +178,118 @@ function WaiterChat() {
 /* ── slide de platos con drag (exportada: se usa también como
       slide embebido en la sección de pruebas de la web principal) ── */
 
+function DishScene({ dish, number, compact, anim, exiting = false }: {
+  dish: Dish; number: string; compact: boolean; anim: string; exiting?: boolean
+}) {
+  return (
+    <div style={{
+      ...(exiting
+        ? { position: 'absolute' as const, inset: 0, pointerEvents: 'none' as const }
+        : { position: 'relative' as const }),
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      textAlign: 'center', width: '100%',
+      animation: `${anim} 0.62s cubic-bezier(0.16,1,0.3,1) both`,
+    }}>
+      {/* número fantasma editorial */}
+      <span aria-hidden style={{
+        position: 'absolute', top: '46%', left: '50%',
+        transform: 'translate(-50%, -60%)',
+        fontFamily: 'var(--font-display)',
+        fontSize: compact ? 'clamp(130px,18vw,200px)' : 'clamp(180px,26vw,320px)',
+        lineHeight: 1, color: '#ede8df', opacity: 0.055,
+        pointerEvents: 'none', userSelect: 'none', letterSpacing: '-0.05em',
+      }}>{number}</span>
+
+      {/* plato */}
+      <div style={{
+        width: compact ? 'clamp(150px,20vw,210px)' : 'clamp(190px,26vw,270px)',
+        height: compact ? 'clamp(150px,20vw,210px)' : 'clamp(190px,26vw,270px)',
+        borderRadius: '50%', position: 'relative',
+        marginBottom: compact ? 'clamp(16px,2.5vh,26px)' : 'clamp(22px,4vh,38px)',
+        background: 'radial-gradient(circle at 33% 28%, rgba(255,255,255,0.2), rgba(0,0,0,0.38) 72%)',
+        border: '1px solid rgba(237,232,223,0.28)',
+        boxShadow: `0 34px 90px rgba(0,0,0,0.55), 0 0 110px ${dish.glow}`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        <span aria-hidden style={{
+          position: 'absolute', inset: '7%', borderRadius: '50%',
+          border: '1px solid rgba(237,232,223,0.16)',
+        }} />
+        <span aria-hidden style={{
+          position: 'absolute', inset: '16%', borderRadius: '50%',
+          border: '1px solid rgba(237,232,223,0.09)',
+          background: 'radial-gradient(circle at 60% 65%, rgba(0,0,0,0.25), transparent 60%)',
+        }} />
+        <span style={{
+          fontSize: compact ? 'clamp(58px,8vw,84px)' : 'clamp(76px,10vw,110px)',
+          filter: 'drop-shadow(0 12px 26px rgba(0,0,0,0.5))',
+        }}>{dish.emoji}</span>
+        {/* sombra elíptica bajo el plato */}
+        <span aria-hidden style={{
+          position: 'absolute', bottom: '-14%', left: '12%', right: '12%', height: '10%',
+          borderRadius: '50%', background: 'rgba(0,0,0,0.45)', filter: 'blur(10px)',
+        }} />
+      </div>
+
+      <div style={{
+        fontFamily: 'var(--font-caps)', fontSize: compact ? 7.5 : 8.5, fontWeight: 600,
+        letterSpacing: 3, textTransform: 'uppercase', color: 'rgba(237,232,223,0.55)',
+        marginBottom: 10,
+      }}>{dish.tag}</div>
+      <h3 style={{
+        fontFamily: 'var(--font-display)', fontWeight: 400,
+        fontSize: compact ? 'clamp(30px,4.6vw,52px)' : 'clamp(40px,6.5vw,74px)',
+        lineHeight: 1, letterSpacing: '-0.03em', color: '#ede8df', marginBottom: 14,
+      }}>{dish.name}</h3>
+      <p style={{
+        fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontWeight: 300,
+        fontSize: compact ? 'clamp(13.5px,1.4vw,16px)' : 'clamp(15px,1.8vw,19px)',
+        lineHeight: 1.55, color: 'rgba(237,232,223,0.72)',
+        maxWidth: 430, marginBottom: 16,
+      }}>{dish.desc}</p>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+        <span style={{
+          fontFamily: 'var(--font-display)',
+          fontSize: compact ? 'clamp(22px,2.6vw,30px)' : 'clamp(26px,3.4vw,38px)',
+          color: '#d4935a',
+        }}>{dish.price}</span>
+        <button
+          onClick={e => { e.stopPropagation(); speak(dish.speech) }}
+          onPointerDown={e => e.stopPropagation()}
+          style={{
+            fontFamily: 'var(--font-caps)', fontSize: 7.5, fontWeight: 600,
+            letterSpacing: 2, textTransform: 'uppercase', color: 'rgba(237,232,223,0.75)',
+            border: '1px solid rgba(237,232,223,0.28)', background: 'rgba(0,0,0,0.18)',
+            padding: '9px 16px', transition: 'all 0.2s',
+          }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = '#d4935a'; (e.currentTarget as HTMLElement).style.color = '#d4935a' }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(237,232,223,0.28)'; (e.currentTarget as HTMLElement).style.color = 'rgba(237,232,223,0.75)' }}
+        >
+          🔊 Que te lo cuente la IA
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export function Carta({ compact = false }: { compact?: boolean }) {
   const [idx, setIdx] = useState(0)
+  const [prev, setPrev] = useState<number | null>(null)
   const [dir, setDir] = useState<1 | -1>(1)
   const dragX = useRef<number | null>(null)
+  const idxRef = useRef(0)
+  const prevTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  useEffect(() => { idxRef.current = idx }, [idx])
   const d = DISHES[idx]
+  const len = DISHES.length
 
-  const go = (delta: 1 | -1) => {
+  const go = (delta: 1 | -1, target?: number) => {
+    stopSpeech()
     setDir(delta)
-    setIdx(i => (i + delta + DISHES.length) % DISHES.length)
+    setPrev(idxRef.current)
+    setIdx(target !== undefined ? target : (idxRef.current + delta + len) % len)
+    if (prevTimer.current) clearTimeout(prevTimer.current)
+    prevTimer.current = setTimeout(() => setPrev(null), 640)
   }
 
   const onDown = (e: React.PointerEvent) => { dragX.current = e.clientX }
@@ -196,7 +306,12 @@ export function Carta({ compact = false }: { compact?: boolean }) {
       if (e.key === 'ArrowLeft') go(-1)
     }
     window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      if (prevTimer.current) clearTimeout(prevTimer.current)
+      stopSpeech()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
@@ -217,77 +332,79 @@ export function Carta({ compact = false }: { compact?: boolean }) {
         border: compact ? '1px solid var(--border-soft)' : 'none',
         boxShadow: compact ? '0 30px 90px rgba(0,0,0,0.4)' : 'none',
       }}>
+      {/* barra superior: título + contador editorial */}
       <div style={{
+        width: '100%', maxWidth: 920,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        marginBottom: compact ? 'clamp(14px,2vh,22px)' : 'clamp(20px,3vh,36px)',
         fontFamily: 'var(--font-caps)', fontSize: 9, fontWeight: 600,
         letterSpacing: 4, textTransform: 'uppercase', color: 'rgba(237,232,223,0.5)',
-        marginBottom: 'clamp(20px,3vh,36px)',
       }}>
-        La carta · arrastra ⟷
+        <span>La carta · arrastra ⟷</span>
+        <span style={{ color: '#d4935a', letterSpacing: 3 }}>
+          {String(idx + 1).padStart(2, '0')} <span style={{ color: 'rgba(237,232,223,0.35)' }}>— {String(len).padStart(2, '0')}</span>
+        </span>
       </div>
 
-      {/* plato con giro carrusel — key fuerza la animación en cada cambio */}
-      <div key={idx} style={{
-        animation: `dishSpin${dir === 1 ? 'R' : 'L'} 0.65s cubic-bezier(0.16,1,0.3,1) both`,
-        display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
-        maxWidth: 640,
-      }}>
-        <div style={{
-          width: 'clamp(180px,26vw,260px)', height: 'clamp(180px,26vw,260px)',
-          borderRadius: '50%', position: 'relative', marginBottom: 'clamp(24px,4vh,40px)',
-          background: 'radial-gradient(circle at 35% 30%, rgba(255,255,255,0.16), rgba(0,0,0,0.35) 70%)',
-          border: '1px solid rgba(237,232,223,0.22)',
-          boxShadow: `0 30px 80px rgba(0,0,0,0.5), 0 0 90px ${d.glow}`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <span aria-hidden style={{
-            position: 'absolute', inset: 14, borderRadius: '50%',
-            border: '1px solid rgba(237,232,223,0.14)',
-          }} />
-          <span style={{ fontSize: 'clamp(72px,10vw,104px)', filter: 'drop-shadow(0 10px 22px rgba(0,0,0,0.4))' }}>
-            {d.emoji}
-          </span>
-        </div>
+      {/* platos vecinos asomando por los bordes */}
+      <button aria-label="Plato anterior" onClick={() => go(-1)}
+        onPointerDown={e => e.stopPropagation()}
+        style={{
+          position: 'absolute', left: compact ? -18 : 'clamp(-30px,-2vw,-10px)', top: '50%',
+          transform: 'translateY(-50%)',
+          fontSize: compact ? 44 : 'clamp(48px,6vw,72px)', lineHeight: 1,
+          opacity: 0.22, filter: 'blur(1.5px) saturate(0.7)',
+          background: 'none', transition: 'opacity 0.25s, filter 0.25s',
+          padding: 10, zIndex: 2,
+        }}
+        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = '0.55'; (e.currentTarget as HTMLElement).style.filter = 'blur(0px)' }}
+        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '0.22'; (e.currentTarget as HTMLElement).style.filter = 'blur(1.5px) saturate(0.7)' }}>
+        {DISHES[(idx - 1 + len) % len].emoji}
+      </button>
+      <button aria-label="Plato siguiente" onClick={() => go(1)}
+        onPointerDown={e => e.stopPropagation()}
+        style={{
+          position: 'absolute', right: compact ? -18 : 'clamp(-30px,-2vw,-10px)', top: '50%',
+          transform: 'translateY(-50%)',
+          fontSize: compact ? 44 : 'clamp(48px,6vw,72px)', lineHeight: 1,
+          opacity: 0.22, filter: 'blur(1.5px) saturate(0.7)',
+          background: 'none', transition: 'opacity 0.25s, filter 0.25s',
+          padding: 10, zIndex: 2,
+        }}
+        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = '0.55'; (e.currentTarget as HTMLElement).style.filter = 'blur(0px)' }}
+        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '0.22'; (e.currentTarget as HTMLElement).style.filter = 'blur(1.5px) saturate(0.7)' }}>
+        {DISHES[(idx + 1) % len].emoji}
+      </button>
 
-        <div style={{
-          fontFamily: 'var(--font-caps)', fontSize: 8.5, fontWeight: 600,
-          letterSpacing: 3, textTransform: 'uppercase', color: 'rgba(237,232,223,0.55)',
-          marginBottom: 12,
-        }}>{d.tag}</div>
-        <h3 style={{
-          fontFamily: 'var(--font-display)', fontWeight: 400,
-          fontSize: 'clamp(40px,6.5vw,74px)', lineHeight: 1, letterSpacing: '-0.03em',
-          color: '#ede8df', marginBottom: 16,
-        }}>{d.name}</h3>
-        <p style={{
-          fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontWeight: 300,
-          fontSize: 'clamp(15px,1.8vw,19px)', lineHeight: 1.6,
-          color: 'rgba(237,232,223,0.7)', maxWidth: 430, marginBottom: 20,
-        }}>{d.desc}</p>
-        <div style={{
-          fontFamily: 'var(--font-display)', fontSize: 'clamp(26px,3.4vw,38px)',
-          color: '#d4935a',
-        }}>{d.price}</div>
+      {/* escena: capa saliente + capa entrante */}
+      <div style={{ position: 'relative', width: '100%', maxWidth: 640 }}>
+        {prev !== null && prev !== idx && (
+          <DishScene
+            dish={DISHES[prev]} number={String(prev + 1).padStart(2, '0')}
+            compact={compact} exiting
+            anim={dir === 1 ? 'dishOutL' : 'dishOutR'}
+          />
+        )}
+        <DishScene
+          key={idx}
+          dish={d} number={String(idx + 1).padStart(2, '0')}
+          compact={compact}
+          anim={dir === 1 ? 'dishSpinR' : 'dishSpinL'}
+        />
       </div>
 
-      {/* controles */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 22, marginTop: 'clamp(28px,4vh,44px)' }}>
-        <button onClick={() => go(-1)} aria-label="Plato anterior" style={{
-          width: 46, height: 46, borderRadius: '50%', fontSize: 17,
-          border: '1px solid rgba(237,232,223,0.3)', color: '#ede8df', background: 'rgba(0,0,0,0.15)',
-        }}>←</button>
-        <div style={{ display: 'flex', gap: 7 }}>
-          {DISHES.map((_, i) => (
-            <button key={i} onClick={() => { setDir(i > idx ? 1 : -1); setIdx(i) }} style={{
-              width: i === idx ? 22 : 8, height: 4, padding: 0,
+      {/* progreso */}
+      <div style={{ display: 'flex', gap: 8, marginTop: compact ? 'clamp(18px,2.5vh,28px)' : 'clamp(26px,4vh,42px)' }}>
+        {DISHES.map((_, i) => (
+          <button key={i} aria-label={`Plato ${i + 1}`}
+            onClick={() => i !== idx && go(i > idx ? 1 : -1, i)}
+            onPointerDown={e => e.stopPropagation()}
+            style={{
+              width: i === idx ? 26 : 9, height: 4, padding: 0,
               background: i === idx ? '#d4935a' : 'rgba(237,232,223,0.3)',
-              transition: 'all 0.3s',
+              transition: 'all 0.35s cubic-bezier(0.16,1,0.3,1)',
             }} />
-          ))}
-        </div>
-        <button onClick={() => go(1)} aria-label="Plato siguiente" style={{
-          width: 46, height: 46, borderRadius: '50%', fontSize: 17,
-          border: '1px solid rgba(237,232,223,0.3)', color: '#ede8df', background: 'rgba(0,0,0,0.15)',
-        }}>→</button>
+        ))}
       </div>
     </section>
   )

@@ -123,7 +123,7 @@ function VoiceSim() {
     if (/precio|cuesta|coste|tarifa/.test(t)) return REPLIES.precio
     if (/humano|robot|persona|real|máquina|maquina/.test(t)) return REPLIES.humano
     if (/horario|hora|abr|cerr/.test(t)) return REPLIES.horario
-    return `Te he entendido: "${transcript}". Puedo ayudarte con citas, precios y horarios. ¿Cuál te interesa?`
+    return 'Te he entendido. Puedo ayudarte con citas, precios y horarios. ¿Cuál te interesa?'
   }
 
   const listen = () => {
