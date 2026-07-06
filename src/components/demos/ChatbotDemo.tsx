@@ -37,10 +37,16 @@ const RULES: Rule[] = [
       'IA, y a mucha honra. Soy exactamente lo que instalamos a los clientes — considérame la prueba viviente. Bueno, "viviente"… tú me entiendes.',
       'Máquina. Pero castellana: te digo las cosas a la cara y no te hago perder el tiempo. Si quieres humano, reserva el diagnóstico y te llaman en menos de 24h.',
     ]},
-  { keys: ['chiste', 'broma', 'gracioso', 'risa', 'jaja'],
+  { keys: ['chiste', 'broma', 'gracioso', 'risa', 'jaja', 'otro'],
     replies: [
-      '¿Sabes por qué el lince no usa CRM? Porque nunca pierde un lead. …Vale, me entrenaron para vender, no para el club de la comedia. ¿Precios o cita?',
-      'Me sé uno de consultores, pero dura 6 meses y se factura por horas. ¿Seguimos?',
+      '¿Sabes por qué el lince no usa CRM? Porque nunca pierde un lead.',
+      '¿Cuántos consultores hacen falta para cambiar una bombilla? Ninguno: te facturan un informe de 80 páginas sobre la oscuridad.',
+      '¿Sabes qué le dijo un lead frío a otro? Nada. Nadie les hizo seguimiento.',
+      'Le pedí vacaciones a mi jefe. Me actualizó el firmware.',
+      'Yo también tuve un Excel con 40 pestañas. Lo superé con terapia y automatización.',
+      'Mi psicólogo dice que tengo dependencia del trabajo. Le expliqué que soy un bot: el trabajo ES mi vida. Me cobró 90 euros igualmente.',
+      '¿En qué se parece un chatbot malo a un contestador? En todo. Por eso existo yo.',
+      'Dicen que las máquinas os quitaremos el trabajo. Tranquilo: solo la parte que odias.',
     ]},
   { keys: ['ya tengo', 'chatbot', 'contestador'],
     replies: [
@@ -73,6 +79,16 @@ const FALLBACKS = [
   'Buen intento. No me han entrenado para eso todavía — me reentrenan cada semana, soy joven. ¿Precios, garantía o cita?',
 ]
 
+const JOKE_REDIRECTS = [
+  'Escucha, que yo no soy una app de chistes: soy el bot de esta empresa y me han configurado cutremente. Deja de jugar conmigo y pide una cita, anda.',
+  'Vale, último. Mi repertorio tiene fondo pero mi jefe mira las métricas: si sigo contando chistes en vez de agendar citas, me reentrenan. ¿Martes 10:00 o jueves 9:00?',
+]
+
+const LONG_CHAT_NUDGES = [
+  'Oye, llevamos ya unos cuantos mensajes y lo estoy pasando bien — pero esto mismo que hago contigo lo haría con TUS clientes: entretener, resolver y llevar a la cita. ¿Te reservo la tuya y te lo enseñamos con tu negocio?',
+  'Te lo digo con cariño de máquina: si un bot te ha aguantado 15 mensajes, imagina lo que aguanta con tus clientes a las 3 de la mañana. Diagnóstico gratis, 60 minutos. ¿Cuándo?',
+]
+
 const CHIPS = ['¿Por qué "los mejores"?', '¿Cuánto cuesta?', 'Quiero una cita', 'Cuéntame un chiste']
 
 export default function ChatbotDemo() {
@@ -84,6 +100,8 @@ export default function ChatbotDemo() {
   const boxRef = useRef<HTMLDivElement>(null)
   const rot = useRef(0)
   const userName = useRef<string | null>(null)
+  const jokesTold = useRef(0)
+  const userMsgs = useRef(0)
 
   useEffect(() => {
     boxRef.current?.scrollTo({ top: boxRef.current.scrollHeight, behavior: 'smooth' })
@@ -96,13 +114,30 @@ export default function ChatbotDemo() {
 
   const answer = (text: string): string => {
     const lower = text.toLowerCase()
+    userMsgs.current += 1
+
     const nameMatch = lower.match(/me llamo (\w+)|soy (\w+)/)
     if (nameMatch) {
       const raw = nameMatch[1] || nameMatch[2]
       userName.current = raw.charAt(0).toUpperCase() + raw.slice(1)
       return `Encantado, ${userName.current}. Ya no se me olvida — memoria de máquina. ¿Qué necesitas: precios, cita o ver de qué somos capaces?`
     }
+
     const rule = RULES.find(r => r.keys.some(k => lower.includes(k)))
+
+    // arco de chistes: entretiene 2-3 rondas y reconduce con gracia
+    if (rule && rule.keys.includes('chiste')) {
+      jokesTold.current += 1
+      if (jokesTold.current > 3) return pick(JOKE_REDIRECTS)
+      const joke = rule.replies[(jokesTold.current - 1) % rule.replies.length]
+      return jokesTold.current === 3 ? `${joke} …Y con este cierro el micro: ¿precios o cita?` : joke
+    }
+
+    // conversación larga sin cita: reconducción natural cada ~8 mensajes
+    if (userMsgs.current > 0 && userMsgs.current % 8 === 0 && !(rule && rule.keys.includes('cita'))) {
+      return pick(LONG_CHAT_NUDGES)
+    }
+
     const base = rule ? pick(rule.replies) : pick(FALLBACKS)
     return userName.current && rule && rule.keys.includes('cita')
       ? base.replace('¿Cuál te va?', `¿Cuál te va, ${userName.current}?`)

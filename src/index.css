@@ -138,6 +138,14 @@ img { display: block; max-width: 100%; }
   8%       { transform: scale(0.82); }
   16%      { transform: scale(1); }
 }
+@keyframes dishSpinR {
+  0%   { opacity: 0; transform: translateX(110px) rotate(14deg) scale(0.82); }
+  100% { opacity: 1; transform: translateX(0) rotate(0deg) scale(1); }
+}
+@keyframes dishSpinL {
+  0%   { opacity: 0; transform: translateX(-110px) rotate(-14deg) scale(0.82); }
+  100% { opacity: 1; transform: translateX(0) rotate(0deg) scale(1); }
+}
 @keyframes menuSlideIn {
   0%   { opacity: 0; transform: translateX(34px) scale(0.98); }
   100% { opacity: 1; transform: translateX(0) scale(1); }

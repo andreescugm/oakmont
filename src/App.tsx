@@ -16,6 +16,7 @@ import FinalCTA from './components/FinalCTA'
 import ServicesDetail from './components/ServicesDetail'
 import CompanyPages from './components/CompanyPages'
 import ContactForm from './components/ContactForm'
+import RestaurantDemo from './components/RestaurantDemo'
 import Legal from './components/Legal'
 import Footer from './components/Footer'
 import StickyBar from './components/StickyBar'
@@ -24,10 +25,10 @@ const HIDDEN_SECTIONS = new Set([
   'sobre-nosotros', 'metodologia', 'casos-exito',
   'servicios', 'diagnostico-estrategico', 'diseno-sistema',
   'implementacion-ia', 'automatizacion-comercial', 'cualificacion-leads',
-  'privacidad', 'aviso-legal',
+  'privacidad', 'aviso-legal', 'demo-restaurante',
 ])
 
-type SectionView = 'services' | 'sobre-nosotros' | 'metodologia' | 'casos-exito' | 'privacidad' | 'aviso-legal'
+type SectionView = 'services' | 'sobre-nosotros' | 'metodologia' | 'casos-exito' | 'privacidad' | 'aviso-legal' | 'demo-restaurante'
 
 const HASH_TO_VIEW: Record<string, SectionView> = {
   servicios: 'services',
@@ -41,6 +42,7 @@ const HASH_TO_VIEW: Record<string, SectionView> = {
   'casos-exito': 'casos-exito',
   privacidad: 'privacidad',
   'aviso-legal': 'aviso-legal',
+  'demo-restaurante': 'demo-restaurante',
 }
 
 type Theme = 'dark' | 'light'
@@ -172,6 +174,7 @@ export default function App() {
             {view === 'casos-exito' && <CompanyPages />}
             {view === 'privacidad' && <Legal />}
             {view === 'aviso-legal' && <Legal />}
+            {view === 'demo-restaurante' && <RestaurantDemo />}
           </main>
           <Footer />
         </>

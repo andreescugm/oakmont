@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { ELEVENLABS_AGENT_ID } from '../../config'
 import { trackLead } from '../../leadScore'
 
-function ElevenLabsWidget() {
+function ElevenLabsWidget({ onBroken }: { onBroken: () => void }) {
   const holder = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -17,7 +17,17 @@ function ElevenLabsWidget() {
     if (holder.current) {
       holder.current.innerHTML = `<elevenlabs-convai agent-id="${ELEVENLABS_AGENT_ID}"></elevenlabs-convai>`
     }
-  }, [])
+    // failsafe: si en 5s el widget no ha pintado nada (agent inválido,
+    // sin widget_config, red caída…), caemos a la simulación local.
+    const t = setTimeout(() => {
+      const el = holder.current?.querySelector('elevenlabs-convai')
+      const sr = el?.shadowRoot
+      const painted = sr && sr.childElementCount > 0 &&
+        ![...sr.children].every(c => c.tagName === 'TEMPLATE' && !(c as HTMLTemplateElement).content.childElementCount)
+      if (!painted) onBroken()
+    }, 5000)
+    return () => clearTimeout(t)
+  }, [onBroken])
 
   return (
     <div style={{
@@ -65,7 +75,8 @@ const OPTIONS: { label: string; key: keyof typeof REPLIES; youSay: string }[] = 
 ]
 
 export default function VoiceDemo() {
-  if (ELEVENLABS_AGENT_ID) return <ElevenLabsWidget />
+  const [broken, setBroken] = useState(false)
+  if (ELEVENLABS_AGENT_ID && !broken) return <ElevenLabsWidget onBroken={() => setBroken(true)} />
   return <VoiceSim />
 }
 

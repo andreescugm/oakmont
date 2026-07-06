@@ -84,9 +84,9 @@ const SITES: SiteConfig[] = [
     items: ['Implantes', 'Ortodoncia', 'Urgencias 24h'],
     convo: [
       { from: 'client', text: 'Hola, me duele una muela y es domingo…' },
-      { from: 'ia', text: 'Lo siento — vamos a resolverlo ya. Tengo urgencia disponible mañana lunes a las 8:30 con la Dra. Vega. ¿Te la reservo?' },
-      { from: 'client', text: 'Sí, por favor. ¿Cuánto costaría?' },
-      { from: 'ia', text: 'La visita de urgencia son 35€, descontables del tratamiento. Reservado ✓ Te acabo de enviar la confirmación por SMS. Si el dolor sube esta noche, responde a este chat: estoy aquí.' },
+      { from: 'ia', text: 'Lo siento — vamos a resolverlo ya. Tengo urgencia mañana lunes 8:30 con la Dra. Vega. ¿Te la reservo?' },
+      { from: 'client', text: 'Sí, por favor. ¿Eres una persona real?' },
+      { from: 'ia', text: 'Soy la IA de la clínica — pero el dolor que te voy a quitar es muy real. Reservado ✓ SMS enviado. Si sube esta noche, escríbeme: yo no duermo, y menos un domingo.' },
     ],
     toast: '✓ Cita registrada · Domingo, 23:12 — sin intervención humana',
   },
@@ -101,8 +101,8 @@ const SITES: SiteConfig[] = [
     convo: [
       { from: 'client', text: 'Quiero reformar el baño, ¿me pasáis presupuesto?' },
       { from: 'ia', text: 'Claro. Tres preguntas rápidas: ¿metros aproximados del baño?' },
-      { from: 'client', text: 'Unos 5m². Ducha en vez de bañera.' },
-      { from: 'ia', text: 'Perfecto: cambio bañera→ducha en 5m², horquilla habitual 3.800–5.200€ según calidades. Te agendo visita técnica gratuita el jueves a las 17:00 para cerrar cifra exacta. ✓ Lead cualificado y enviado al jefe de obra.' },
+      { from: 'client', text: 'Unos 5m². Ducha en vez de bañera. ¿Y no me tendréis 3 meses esperando?' },
+      { from: 'ia', text: 'Horquilla para 5m² con cambio a ducha: 3.800–5.200€ según calidades. Visita técnica gratuita el jueves 17:00 — y si llegamos tarde, el café corre de nuestra cuenta. ✓ Enviado al jefe de obra.' },
     ],
     toast: '✓ Lead cualificado en 40 segundos · Presupuesto en camino',
   },
@@ -271,16 +271,29 @@ export default function DemoWebs() {
         )}
       </div>
 
-      <button onClick={play} disabled={playing} style={{
-        padding: '14px', borderTop: '1px solid var(--border-subtle)',
-        fontFamily: 'var(--font-caps)', fontSize: 8.5, fontWeight: 600,
-        letterSpacing: 2.5, textTransform: 'uppercase',
-        background: playing ? 'var(--bg-raised)' : 'var(--copper)',
-        color: playing ? 'var(--text-muted)' : '#fff',
-        transition: 'all 0.2s', cursor: playing ? 'default' : 'pointer',
-      }}>
-        {playing ? 'La IA está atendiendo…' : shown > 0 ? '↻ Repetir demo' : '▶ Ver a la IA atender'}
-      </button>
+      <div style={{ display: 'flex', borderTop: '1px solid var(--border-subtle)' }}>
+        <button onClick={play} disabled={playing} style={{
+          flex: 1, padding: '14px',
+          fontFamily: 'var(--font-caps)', fontSize: 8.5, fontWeight: 600,
+          letterSpacing: 2.5, textTransform: 'uppercase',
+          background: playing ? 'var(--bg-raised)' : 'var(--copper)',
+          color: playing ? 'var(--text-muted)' : '#fff',
+          transition: 'all 0.2s', cursor: playing ? 'default' : 'pointer',
+        }}>
+          {playing ? 'La IA está atendiendo…' : shown > 0 ? '↻ Repetir demo' : '▶ Ver a la IA atender'}
+        </button>
+        {site.id === 'restaurante' && (
+          <a href="#demo-restaurante" style={{
+            padding: '14px 18px', display: 'flex', alignItems: 'center',
+            fontFamily: 'var(--font-caps)', fontSize: 8.5, fontWeight: 600,
+            letterSpacing: 2, textTransform: 'uppercase',
+            color: 'var(--copper-soft)', background: 'var(--copper-glow)',
+            borderLeft: '1px solid var(--border-subtle)', whiteSpace: 'nowrap',
+          }}>
+            Web completa ↗
+          </a>
+        )}
+      </div>
     </div>
   )
 }

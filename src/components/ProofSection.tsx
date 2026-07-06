@@ -31,8 +31,8 @@ const SLIDES: Slide[] = [
   {
     n: '03',
     claim: 'Así queda tu web con Talos dentro.',
-    proof: 'Dos ejemplos',
-    desc: 'Negocios ficticios. IA real. Mira cómo cierra una cita un domingo de madrugada.',
+    proof: 'Tres ejemplos',
+    desc: 'Negocios ficticios. IA real. Y si quieres verlo a pantalla completa: entra en la web del restaurante, arrastra la carta y reserva mesa con el camarero digital.',
     demo: <DemoWebs />,
   },
   {
