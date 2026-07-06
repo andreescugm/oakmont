@@ -168,9 +168,10 @@ function WaiterChat() {
   )
 }
 
-/* ── slide de platos con drag ── */
+/* ── slide de platos con drag (exportada: se usa también como
+      slide embebido en la sección de pruebas de la web principal) ── */
 
-function Carta() {
+export function Carta({ compact = false }: { compact?: boolean }) {
   const [idx, setIdx] = useState(0)
   const [dir, setDir] = useState<1 | -1>(1)
   const dragX = useRef<number | null>(null)
@@ -200,15 +201,21 @@ function Carta() {
 
   return (
     <section
-      id="carta-brasa"
+      id={compact ? undefined : 'carta-brasa'}
       onPointerDown={onDown} onPointerUp={onUp}
       style={{
-        minHeight: '100vh', background: d.bg,
+        minHeight: compact ? 'min(78vh, 680px)' : '100vh',
+        width: '100%',
+        background: d.bg,
         transition: 'background 0.9s cubic-bezier(0.4,0,0.2,1)',
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        padding: 'clamp(90px,12vh,140px) clamp(24px,6vw,96px) clamp(60px,8vh,100px)',
+        padding: compact
+          ? 'clamp(36px,5vh,56px) clamp(20px,4vw,56px)'
+          : 'clamp(90px,12vh,140px) clamp(24px,6vw,96px) clamp(60px,8vh,100px)',
         position: 'relative', overflow: 'hidden', cursor: 'grab', touchAction: 'pan-y',
         userSelect: 'none',
+        border: compact ? '1px solid var(--border-soft)' : 'none',
+        boxShadow: compact ? '0 30px 90px rgba(0,0,0,0.4)' : 'none',
       }}>
       <div style={{
         fontFamily: 'var(--font-caps)', fontSize: 9, fontWeight: 600,

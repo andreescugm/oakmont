@@ -1,6 +1,23 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { ELEVENLABS_AGENT_ID } from '../../config'
 import { trackLead } from '../../leadScore'
+import { speak as speakTTS, stopSpeech } from '../../speech'
+
+type SpeechRecognitionCtor = new () => {
+  lang: string
+  continuous: boolean
+  interimResults: boolean
+  onresult: ((e: { results: { [i: number]: { [j: number]: { transcript: string } } } }) => void) | null
+  onend: (() => void) | null
+  onerror: (() => void) | null
+  start: () => void
+  stop: () => void
+}
+
+function getRecognition(): SpeechRecognitionCtor | null {
+  const w = window as unknown as { SpeechRecognition?: SpeechRecognitionCtor; webkitSpeechRecognition?: SpeechRecognitionCtor }
+  return w.SpeechRecognition || w.webkitSpeechRecognition || null
+}
 
 function ElevenLabsWidget({ onBroken }: { onBroken: () => void }) {
   const holder = useRef<HTMLDivElement>(null)
@@ -87,29 +104,51 @@ function VoiceSim() {
   const [seconds, setSeconds] = useState(0)
   const audioCtx = useRef<AudioContext | null>(null)
   const timer = useRef<ReturnType<typeof setInterval> | null>(null)
-  const canSpeak = typeof window !== 'undefined' && 'speechSynthesis' in window
+  const [listening, setListening] = useState(false)
+  const canListen = typeof window !== 'undefined' && !!getRecognition()
 
   useEffect(() => () => {
     if (timer.current) clearInterval(timer.current)
-    if (canSpeak) window.speechSynthesis.cancel()
+    stopSpeech()
     audioCtx.current?.close().catch(() => {})
-  }, [canSpeak])
+  }, [])
 
   const speak = useCallback((text: string) => {
-    if (!canSpeak) return
-    window.speechSynthesis.cancel()
-    const u = new SpeechSynthesisUtterance(text)
-    u.lang = 'es-ES'
-    const voices = window.speechSynthesis.getVoices()
-    const es = voices.find(v => v.lang.startsWith('es') && /female|mónica|monica|paulina|helena/i.test(v.name))
-      || voices.find(v => v.lang.startsWith('es'))
-    if (es) u.voice = es
-    u.rate = 1.02
-    u.pitch = 1.05
-    u.onstart = () => setSpeaking(true)
-    u.onend = () => setSpeaking(false)
-    window.speechSynthesis.speak(u)
-  }, [canSpeak])
+    speakTTS(text, () => setSpeaking(true), () => setSpeaking(false))
+  }, [])
+
+  const heardReply = (transcript: string): string => {
+    const t = transcript.toLowerCase()
+    if (/cita|reserva|hueco|agenda/.test(t)) return REPLIES.cita
+    if (/precio|cuesta|coste|tarifa/.test(t)) return REPLIES.precio
+    if (/humano|robot|persona|real|máquina|maquina/.test(t)) return REPLIES.humano
+    if (/horario|hora|abr|cerr/.test(t)) return REPLIES.horario
+    return `Te he entendido: "${transcript}". Puedo ayudarte con citas, precios y horarios. ¿Cuál te interesa?`
+  }
+
+  const listen = () => {
+    const Rec = getRecognition()
+    if (!Rec || state !== 'live') return
+    stopSpeech()
+    setSpeaking(false)
+    const rec = new Rec()
+    rec.lang = 'es-ES'
+    rec.continuous = false
+    rec.interimResults = false
+    setListening(true)
+    rec.onresult = (e) => {
+      const transcript = e.results[0][0].transcript
+      setLines(l => [...l, { from: 'you', text: transcript }])
+      const reply = heardReply(transcript)
+      setTimeout(() => {
+        setLines(l => [...l, { from: 'ia', text: reply }])
+        speak(reply)
+      }, 500)
+    }
+    rec.onend = () => setListening(false)
+    rec.onerror = () => setListening(false)
+    rec.start()
+  }
 
   const ringTone = useCallback(async (): Promise<void> => {
     try {
@@ -157,7 +196,7 @@ function VoiceSim() {
 
   const endCall = () => {
     if (timer.current) clearInterval(timer.current)
-    if (canSpeak) window.speechSynthesis.cancel()
+    stopSpeech()
     setSpeaking(false)
     setState('ended')
   }
@@ -195,11 +234,9 @@ function VoiceSim() {
           onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'var(--copper)'}>
             Simular llamada →
           </button>
-          {!canSpeak && (
-            <span style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--text-muted)' }}>
-              (Tu navegador no soporta voz — verás la transcripción)
-            </span>
-          )}
+          <span style={{ fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--text-muted)' }}>
+            Con sonido — y si tu navegador lo permite, puedes hablarle con el micrófono
+          </span>
         </div>
       )}
 
@@ -245,6 +282,18 @@ function VoiceSim() {
 
           {state === 'live' && (
             <div style={{ padding: '10px 14px', borderTop: '1px solid var(--border-subtle)', display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+              {canListen && (
+                <button onClick={listen} disabled={listening} style={{
+                  fontFamily: 'var(--font-caps)', fontSize: 8, fontWeight: 600,
+                  letterSpacing: 1.8, textTransform: 'uppercase',
+                  padding: '8px 14px',
+                  background: listening ? 'var(--teal)' : 'var(--copper)',
+                  color: '#fff',
+                  animation: listening ? 'pulseGlow 1s ease-in-out infinite' : 'none',
+                }}>
+                  {listening ? '🎤 Te escucho…' : '🎤 Hablar'}
+                </button>
+              )}
               {OPTIONS.map(o => (
                 <button key={o.key} onClick={() => respond(o)} style={{
                   fontFamily: 'var(--font-sans)', fontSize: 11.5,

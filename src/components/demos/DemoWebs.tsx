@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { trackLead } from '../../leadScore'
+import { speak as speakEs, stopSpeech } from '../../speech'
 
 interface Turn { from: 'client' | 'ia'; text: string }
 
@@ -15,25 +16,16 @@ interface SiteConfig {
   items: string[]
   convo: Turn[]
   toast: string
+  explain: string[]
   menu?: Dish[]
 }
 
-function speakEs(text: string) {
-  if (!('speechSynthesis' in window)) return
-  window.speechSynthesis.cancel()
-  const u = new SpeechSynthesisUtterance(text)
-  u.lang = 'es-ES'
-  const es = window.speechSynthesis.getVoices().find(v => v.lang.startsWith('es'))
-  if (es) u.voice = es
-  u.rate = 1
-  window.speechSynthesis.speak(u)
-}
 
 function MenuSlider({ dishes, accent }: { dishes: Dish[]; accent: string }) {
   const [idx, setIdx] = useState(0)
   useEffect(() => {
     const t = setInterval(() => setIdx(i => (i + 1) % dishes.length), 4200)
-    return () => { clearInterval(t); window.speechSynthesis?.cancel() }
+    return () => { clearInterval(t); stopSpeech() }
   }, [dishes.length])
   const d = dishes[idx]
   return (
@@ -89,6 +81,11 @@ const SITES: SiteConfig[] = [
       { from: 'ia', text: 'Soy la IA de la clínica — pero el dolor que te voy a quitar es muy real. Reservado ✓ SMS enviado. Si sube esta noche, escríbeme: yo no duermo, y menos un domingo.' },
     ],
     toast: '✓ Cita registrada · Domingo, 23:12 — sin intervención humana',
+    explain: [
+      'Atendió a un paciente con dolor un domingo por la noche',
+      'Le dio hueco real de agenda y precio, sin hacerle esperar',
+      'Registró la cita y envió el SMS — cero humanos implicados',
+    ],
   },
   {
     id: 'reformas',
@@ -105,6 +102,11 @@ const SITES: SiteConfig[] = [
       { from: 'ia', text: 'Horquilla para 5m² con cambio a ducha: 3.800–5.200€ según calidades. Visita técnica gratuita el jueves 17:00 — y si llegamos tarde, el café corre de nuestra cuenta. ✓ Enviado al jefe de obra.' },
     ],
     toast: '✓ Lead cualificado en 40 segundos · Presupuesto en camino',
+    explain: [
+      'Cualificó el lead: metros, tipo de obra, urgencia',
+      'Dio horquilla de precio al instante — sin marear al cliente',
+      'Agendó la visita técnica y avisó al jefe de obra',
+    ],
   },
   {
     id: 'restaurante',
@@ -127,6 +129,11 @@ const SITES: SiteConfig[] = [
       { from: 'ia', text: 'Viernes 21:30 para 8 — hecho, os guardo la mesa larga de la terraza. Aviso a cocina de la intolerancia al gluten: el lechazo y el pulpo son seguros, y hay pan sin gluten. ¿Confirmo? ✓' },
     ],
     toast: '✓ Mesa de 8 reservada + alergia registrada en cocina · 23:58',
+    explain: [
+      'Reservó una mesa de 8 un viernes a las 23:58',
+      'Registró una intolerancia directamente en cocina',
+      'Confirmó al cliente al momento — el restaurante estaba cerrado',
+    ],
   },
 ]
 
@@ -135,30 +142,50 @@ export default function DemoWebs() {
   const [shown, setShown] = useState(0)
   const [playing, setPlaying] = useState(false)
   const [toast, setToast] = useState(false)
+  const [typing, setTyping] = useState(false)
+  const [explain, setExplain] = useState(false)
   const timers = useRef<ReturnType<typeof setTimeout>[]>([])
+  const scrollRef = useRef<HTMLDivElement>(null)
   const site = SITES[active]
 
   const clear = () => { timers.current.forEach(clearTimeout); timers.current = [] }
   useEffect(() => clear, [])
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
+  }, [shown, typing, toast, explain])
 
-  const switchSite = (i: number) => {
+  const reset = () => {
     clear()
-    setActive(i)
     setShown(0)
     setPlaying(false)
     setToast(false)
+    setTyping(false)
+    setExplain(false)
+  }
+
+  const switchSite = (i: number) => {
+    reset()
+    setActive(i)
   }
 
   const play = () => {
     trackLead('vio las webs demo', 10)
-    clear()
-    setShown(0)
-    setToast(false)
+    reset()
     setPlaying(true)
-    SITES[active].convo.forEach((_, i) => {
-      timers.current.push(setTimeout(() => setShown(i + 1), 1100 * (i + 1)))
+    // ritmo pausado: la IA "escribe" antes de responder,
+    // para que el dueño de negocio pueda leer y entender cada paso
+    let t = 500
+    SITES[active].convo.forEach((turn, i) => {
+      if (turn.from === 'ia') {
+        timers.current.push(setTimeout(() => setTyping(true), t))
+        t += 1400
+      }
+      timers.current.push(setTimeout(() => { setTyping(false); setShown(i + 1) }, t))
+      t += turn.from === 'ia' ? 2600 : 1600
     })
-    timers.current.push(setTimeout(() => { setToast(true); setPlaying(false) }, 1100 * (SITES[active].convo.length + 1)))
+    timers.current.push(setTimeout(() => setToast(true), t))
+    t += 1400
+    timers.current.push(setTimeout(() => { setExplain(true); setPlaying(false) }, t))
   }
 
   return (
@@ -204,7 +231,7 @@ export default function DemoWebs() {
       </div>
 
       {/* mini web */}
-      <div style={{ flex: 1, overflowY: 'auto', position: 'relative' }}>
+      <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto', position: 'relative' }}>
         <div style={{ padding: '22px 24px 14px' }}>
           <div style={{
             fontFamily: 'var(--font-caps)', fontSize: 11, fontWeight: 600,
@@ -248,12 +275,55 @@ export default function DemoWebs() {
               color: 'var(--text-primary)',
             }}>{t.text}</div>
           ))}
+          {typing && (
+            <div style={{
+              alignSelf: 'flex-start', padding: '9px 13px', display: 'flex', gap: 4,
+              background: 'var(--bg-raised)', border: `1px solid ${site.accent}44`,
+            }}>
+              {[0, 1, 2].map(i => (
+                <span key={i} style={{
+                  width: 5, height: 5, borderRadius: '50%', background: site.accent,
+                  animation: `typingDot 1.2s ${i * 0.2}s infinite`,
+                }} />
+              ))}
+            </div>
+          )}
           {shown === 0 && !playing && (
             <div style={{
               fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 14,
               color: 'var(--text-muted)', textAlign: 'center', padding: '18px 0',
             }}>
               Pulsa play y mira a la IA atender a un cliente real ↓
+            </div>
+          )}
+          {explain && (
+            <div style={{
+              marginTop: 8, padding: '14px 16px',
+              border: `1px solid ${site.accent}55`, background: 'var(--bg-raised)',
+              animation: 'menuSlideIn 0.5s ease both',
+            }}>
+              <div style={{
+                fontFamily: 'var(--font-caps)', fontSize: 7.5, fontWeight: 600,
+                letterSpacing: 2, textTransform: 'uppercase', color: site.accent, marginBottom: 10,
+              }}>
+                Lo que acaba de pasar
+              </div>
+              {site.explain.map((e, i) => (
+                <div key={i} style={{
+                  fontFamily: 'var(--font-sans)', fontSize: 12, lineHeight: 1.5,
+                  color: 'var(--text-secondary)', marginBottom: 6,
+                  display: 'flex', gap: 8,
+                }}>
+                  <span style={{ color: site.accent }}>{i + 1}.</span> {e}
+                </div>
+              ))}
+              <div style={{
+                fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 13,
+                color: 'var(--text-primary)', marginTop: 10, paddingTop: 10,
+                borderTop: '1px solid var(--border-subtle)',
+              }}>
+                Esto mismo lo instalamos en tu negocio. Da igual el sector: si entran clientes, funciona.
+              </div>
             </div>
           )}
         </div>

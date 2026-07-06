@@ -4,6 +4,7 @@ import ChatbotDemo from './demos/ChatbotDemo'
 import VoiceDemo from './demos/VoiceDemo'
 import DemoWebs from './demos/DemoWebs'
 import RoiCalculator from './demos/RoiCalculator'
+import { Carta } from './RestaurantDemo'
 
 interface Slide {
   n: string
@@ -11,6 +12,7 @@ interface Slide {
   proof: string
   desc: string
   demo: ReactNode
+  wide?: boolean
 }
 
 const SLIDES: Slide[] = [
@@ -37,6 +39,14 @@ const SLIDES: Slide[] = [
   },
   {
     n: '04',
+    wide: true,
+    claim: 'Una web de 10.000 € — de muestra.',
+    proof: 'Arrastra los platos',
+    desc: 'Esto es lo que entregamos: cada plato es un slide, el fondo cambia contigo y el camarero es una IA. Arrastra ⟷ aquí mismo, o entra en la web completa.',
+    demo: <Carta compact />,
+  },
+  {
+    n: '05',
     claim: 'Esto es lo que pierdes cada año.',
     proof: 'Calcúlalo',
     desc: 'Tres deslizadores. Tu cifra. Gratis — como el plan para recuperarla.',
@@ -83,7 +93,7 @@ export default function ProofSection() {
               fontSize: 'clamp(17px,1.8vw,22px)', lineHeight: 1.6,
               color: 'var(--text-secondary)', maxWidth: 640, margin: '0 auto',
             }}>
-              Cuatro demos funcionando en esta página. Tócalas. Rómpelas si puedes.
+              Cinco demos funcionando en esta página. Tócalas. Rómpelas si puedes.
             </p>
           </Reveal>
           <Reveal dir="fade" delay={420}>
@@ -108,6 +118,47 @@ export default function ProofSection() {
           display: 'flex', alignItems: 'center',
           padding: 'clamp(100px,12vh,150px) clamp(24px,6vw,96px) clamp(60px,8vh,100px)',
         }}>
+          {s.wide ? (
+            <div style={{ maxWidth: 1100, margin: '0 auto', width: '100%' }}>
+              <div style={{
+                display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
+                gap: 24, flexWrap: 'wrap', marginBottom: 'clamp(20px,3vh,32px)',
+              }}>
+                <div style={{ maxWidth: 620 }}>
+                  <Reveal dir="up">
+                    <h3 style={{
+                      fontFamily: 'var(--font-display)', fontWeight: 400,
+                      fontSize: 'clamp(26px,3.4vw,44px)', lineHeight: 1.1,
+                      letterSpacing: '-0.02em', color: 'var(--text-primary)', marginBottom: 12,
+                    }}>{s.claim}</h3>
+                  </Reveal>
+                  <Reveal dir="up" delay={120}>
+                    <p style={{
+                      fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontWeight: 300,
+                      fontSize: 'clamp(14px,1.4vw,17px)', lineHeight: 1.6,
+                      color: 'var(--text-secondary)',
+                    }}>{s.desc}</p>
+                  </Reveal>
+                </div>
+                <Reveal dir="fade" delay={200}>
+                  <a href="#demo-restaurante" style={{
+                    fontFamily: 'var(--font-caps)', fontSize: 8.5, fontWeight: 600,
+                    letterSpacing: 2.5, textTransform: 'uppercase',
+                    color: 'var(--copper-soft)', border: '1px solid var(--copper-dim)',
+                    background: 'var(--copper-glow)', padding: '14px 26px',
+                    whiteSpace: 'nowrap', transition: 'all 0.2s',
+                  }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--copper)'; (e.currentTarget as HTMLElement).style.color = '#fff' }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'var(--copper-glow)'; (e.currentTarget as HTMLElement).style.color = 'var(--copper-soft)' }}>
+                    Entrar en la web completa ↗
+                  </a>
+                </Reveal>
+              </div>
+              <Reveal dir="scale" delay={150}>
+                {s.demo}
+              </Reveal>
+            </div>
+          ) : (
           <div className="grid-2col" style={{
             display: 'grid', gridTemplateColumns: '1fr 1fr',
             gap: 'clamp(36px,5vw,80px)', alignItems: 'center',
@@ -154,6 +205,7 @@ export default function ProofSection() {
               {s.demo}
             </Reveal>
           </div>
+          )}
         </div>
       ))}
     </section>
