@@ -208,6 +208,21 @@ img { display: block; max-width: 100%; }
   .pipeline-link { width: 1px !important; height: 28px !important; margin: 0 auto; }
 }
 
+/* ── móvil: el apilado sticky corta contenido → flujo normal ── */
+@media (max-width: 900px) {
+  .proof-slide {
+    position: relative !important;
+    top: auto !important;
+    min-height: auto !important;
+    box-shadow: none !important;
+    padding-top: 72px !important;
+    padding-bottom: 56px !important;
+  }
+}
+@media (max-width: 640px) {
+  .carta-peek { display: none !important; }
+}
+
 /* ── Responsive ── */
 @media (max-width: 900px) {
   .grid-2col {

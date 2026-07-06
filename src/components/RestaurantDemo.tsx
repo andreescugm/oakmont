@@ -347,7 +347,7 @@ export function Carta({ compact = false }: { compact?: boolean }) {
       </div>
 
       {/* platos vecinos asomando por los bordes */}
-      <button aria-label="Plato anterior" onClick={() => go(-1)}
+      <button aria-label="Plato anterior" className="carta-peek" onClick={() => go(-1)}
         onPointerDown={e => e.stopPropagation()}
         style={{
           position: 'absolute', left: compact ? -18 : 'clamp(-30px,-2vw,-10px)', top: '50%',
@@ -361,7 +361,7 @@ export function Carta({ compact = false }: { compact?: boolean }) {
         onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '0.22'; (e.currentTarget as HTMLElement).style.filter = 'blur(1.5px) saturate(0.7)' }}>
         {DISHES[(idx - 1 + len) % len].emoji}
       </button>
-      <button aria-label="Plato siguiente" onClick={() => go(1)}
+      <button aria-label="Plato siguiente" className="carta-peek" onClick={() => go(1)}
         onPointerDown={e => e.stopPropagation()}
         style={{
           position: 'absolute', right: compact ? -18 : 'clamp(-30px,-2vw,-10px)', top: '50%',

@@ -58,7 +58,7 @@ export default function ProofSection() {
   return (
     <section id="pruebas" style={{ position: 'relative' }}>
       {/* intro slide */}
-      <div style={{
+      <div className="proof-slide" style={{
         position: 'sticky', top: 0, minHeight: '100vh',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         background: 'var(--bg-base)', zIndex: 1,
@@ -109,7 +109,7 @@ export default function ProofSection() {
 
       {/* proof slides — stack over each other */}
       {SLIDES.map((s, i) => (
-        <div key={s.n} style={{
+        <div key={s.n} className="proof-slide" style={{
           position: 'sticky', top: 0, minHeight: '100vh',
           zIndex: 2 + i,
           background: i % 2 === 0 ? 'var(--bg-surface)' : 'var(--bg-base)',
