@@ -42,7 +42,7 @@ const SLIDES: Slide[] = [
     wide: true,
     claim: 'Una web de 10.000 € — de muestra.',
     proof: 'Arrastra los platos',
-    desc: 'Esto es lo que entregamos: cada plato es un slide, el fondo cambia contigo y el camarero es una IA. Arrastra ⟷ aquí mismo, o entra en la web completa.',
+    desc: 'Esto es lo que entregamos: cada plato es un slide con foto real, el fondo cambia contigo y el maître es una IA. Arrastra ⟷ aquí, o entra en CENDRA, la web completa.',
     demo: <Carta compact />,
   },
   {
@@ -141,7 +141,7 @@ export default function ProofSection() {
                   </Reveal>
                 </div>
                 <Reveal dir="fade" delay={200}>
-                  <a href="#demo-restaurante" style={{
+                  <a href="/demo/cendra/" target="_blank" rel="noopener" style={{
                     fontFamily: 'var(--font-caps)', fontSize: 8.5, fontWeight: 600,
                     letterSpacing: 2.5, textTransform: 'uppercase',
                     color: 'var(--copper-soft)', border: '1px solid var(--copper-dim)',

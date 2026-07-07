@@ -12,15 +12,19 @@ interface Dish {
   desc: string
   price: string
   emoji: string
+  img: string       // foto real (Unsplash)
   bg: string        // gradiente de fondo de página
   glow: string      // color del halo del plato
   tag: string
   speech: string    // narración (audio estático pregenerado)
 }
 
+const UNSPLASH = (id: string) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=900&q=80`
+
 const DISHES: Dish[] = [
   {
     name: 'Pato trufado',
+    img: UNSPLASH('photo-1546833999-b9f581a1996d'),
     desc: 'Magret madurado 21 días, trufa negra de Soria y reducción de Pedro Ximénez.',
     price: '28 €', emoji: '🦆', tag: 'La firma de la casa',
     bg: 'linear-gradient(160deg, #5d1b26 0%, #2e0d13 100%)', glow: 'rgba(220,90,110,0.35)',
@@ -28,6 +32,7 @@ const DISHES: Dish[] = [
   },
   {
     name: 'César de corral',
+    img: UNSPLASH('photo-1512621776951-a57141f2eefd'),
     desc: 'Pollo de corral a la brasa, parmesano de 24 meses y anchoa del Cantábrico.',
     price: '14 €', emoji: '🥗', tag: 'Fresca y canalla',
     bg: 'linear-gradient(160deg, #24462e 0%, #0f2416 100%)', glow: 'rgba(110,200,140,0.3)',
@@ -35,6 +40,7 @@ const DISHES: Dish[] = [
   },
   {
     name: 'Lechazo 18 horas',
+    img: UNSPLASH('photo-1544025162-d76694265947'),
     desc: 'Asado lento sobre brasa de encina. Se corta con cuchara, se recuerda años.',
     price: '24 €', emoji: '🍖', tag: 'El motivo del viaje',
     bg: 'linear-gradient(160deg, #6e4220 0%, #33200e 100%)', glow: 'rgba(212,147,90,0.4)',
@@ -42,6 +48,7 @@ const DISHES: Dish[] = [
   },
   {
     name: 'Pulpo a la brasa',
+    img: UNSPLASH('photo-1599487488170-d11ec9c172f0'),
     desc: 'Carbón de encina, pimentón de la Vera y parmentier de patata asada.',
     price: '19 €', emoji: '🐙', tag: 'Fuera crujiente, dentro mantequilla',
     bg: 'linear-gradient(160deg, #123c46 0%, #081e24 100%)', glow: 'rgba(90,190,200,0.32)',
@@ -49,6 +56,7 @@ const DISHES: Dish[] = [
   },
   {
     name: 'Torrija de brioche',
+    img: UNSPLASH('photo-1551024506-0bccd828d307'),
     desc: 'Caramelizada al momento, helado de leche merengada. El final que pide la mesa.',
     price: '8 €', emoji: '🍮', tag: 'No se comparte (avisamos)',
     bg: 'linear-gradient(160deg, #7c5619 0%, #3a290c 100%)', glow: 'rgba(230,180,90,0.35)',
@@ -200,30 +208,25 @@ function DishScene({ dish, number, compact, anim, exiting = false }: {
         pointerEvents: 'none', userSelect: 'none', letterSpacing: '-0.05em',
       }}>{number}</span>
 
-      {/* plato */}
+      {/* plato — foto real */}
       <div style={{
-        width: compact ? 'clamp(150px,20vw,210px)' : 'clamp(190px,26vw,270px)',
-        height: compact ? 'clamp(150px,20vw,210px)' : 'clamp(190px,26vw,270px)',
+        width: compact ? 'clamp(160px,22vw,230px)' : 'clamp(200px,27vw,290px)',
+        height: compact ? 'clamp(160px,22vw,230px)' : 'clamp(200px,27vw,290px)',
         borderRadius: '50%', position: 'relative',
         marginBottom: compact ? 'clamp(16px,2.5vh,26px)' : 'clamp(22px,4vh,38px)',
-        background: 'radial-gradient(circle at 33% 28%, rgba(255,255,255,0.2), rgba(0,0,0,0.38) 72%)',
-        border: '1px solid rgba(237,232,223,0.28)',
-        boxShadow: `0 34px 90px rgba(0,0,0,0.55), 0 0 110px ${dish.glow}`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: `url(${dish.img}) center/cover no-repeat`,
+        border: '1px solid rgba(237,232,223,0.3)',
+        boxShadow: `0 34px 90px rgba(0,0,0,0.55), 0 0 110px ${dish.glow}, inset 0 0 60px rgba(0,0,0,0.35)`,
+        filter: 'saturate(0.92) contrast(1.06)',
       }}>
         <span aria-hidden style={{
-          position: 'absolute', inset: '7%', borderRadius: '50%',
-          border: '1px solid rgba(237,232,223,0.16)',
+          position: 'absolute', inset: '4%', borderRadius: '50%',
+          border: '1px solid rgba(237,232,223,0.22)',
         }} />
         <span aria-hidden style={{
-          position: 'absolute', inset: '16%', borderRadius: '50%',
-          border: '1px solid rgba(237,232,223,0.09)',
-          background: 'radial-gradient(circle at 60% 65%, rgba(0,0,0,0.25), transparent 60%)',
+          position: 'absolute', inset: 0, borderRadius: '50%',
+          background: 'radial-gradient(circle at 32% 26%, rgba(255,255,255,0.14), transparent 45%), radial-gradient(circle at 50% 50%, transparent 55%, rgba(0,0,0,0.4) 100%)',
         }} />
-        <span style={{
-          fontSize: compact ? 'clamp(58px,8vw,84px)' : 'clamp(76px,10vw,110px)',
-          filter: 'drop-shadow(0 12px 26px rgba(0,0,0,0.5))',
-        }}>{dish.emoji}</span>
         {/* sombra elíptica bajo el plato */}
         <span aria-hidden style={{
           position: 'absolute', bottom: '-14%', left: '12%', right: '12%', height: '10%',
@@ -357,9 +360,13 @@ export function Carta({ compact = false }: { compact?: boolean }) {
           background: 'none', transition: 'opacity 0.25s, filter 0.25s',
           padding: 10, zIndex: 2,
         }}
-        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = '0.55'; (e.currentTarget as HTMLElement).style.filter = 'blur(0px)' }}
-        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '0.22'; (e.currentTarget as HTMLElement).style.filter = 'blur(1.5px) saturate(0.7)' }}>
-        {DISHES[(idx - 1 + len) % len].emoji}
+        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = '0.6'; (e.currentTarget as HTMLElement).style.filter = 'blur(0px)' }}
+        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '0.25'; (e.currentTarget as HTMLElement).style.filter = 'blur(1.5px) saturate(0.7)' }}>
+        <span aria-hidden style={{
+          display: 'block', width: compact ? 48 : 62, height: compact ? 48 : 62,
+          borderRadius: '50%', border: '1px solid rgba(237,232,223,0.3)',
+          background: `url(${DISHES[(idx - 1 + len) % len].img}) center/cover no-repeat`,
+        }} />
       </button>
       <button aria-label="Plato siguiente" className="carta-peek" onClick={() => go(1)}
         onPointerDown={e => e.stopPropagation()}
@@ -371,9 +378,13 @@ export function Carta({ compact = false }: { compact?: boolean }) {
           background: 'none', transition: 'opacity 0.25s, filter 0.25s',
           padding: 10, zIndex: 2,
         }}
-        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = '0.55'; (e.currentTarget as HTMLElement).style.filter = 'blur(0px)' }}
-        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '0.22'; (e.currentTarget as HTMLElement).style.filter = 'blur(1.5px) saturate(0.7)' }}>
-        {DISHES[(idx + 1) % len].emoji}
+        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.opacity = '0.6'; (e.currentTarget as HTMLElement).style.filter = 'blur(0px)' }}
+        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.opacity = '0.25'; (e.currentTarget as HTMLElement).style.filter = 'blur(1.5px) saturate(0.7)' }}>
+        <span aria-hidden style={{
+          display: 'block', width: compact ? 48 : 62, height: compact ? 48 : 62,
+          borderRadius: '50%', border: '1px solid rgba(237,232,223,0.3)',
+          background: `url(${DISHES[(idx + 1) % len].img}) center/cover no-repeat`,
+        }} />
       </button>
 
       {/* escena: capa saliente + capa entrante */}
