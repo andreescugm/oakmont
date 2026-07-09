@@ -4,7 +4,7 @@ import ChatbotDemo from './demos/ChatbotDemo'
 import VoiceDemo from './demos/VoiceDemo'
 import DemoWebs from './demos/DemoWebs'
 import RoiCalculator from './demos/RoiCalculator'
-import { Carta } from './RestaurantDemo'
+import { DEMO_WEB_URL } from '../config'
 
 interface Slide {
   n: string
@@ -34,16 +34,26 @@ const SLIDES: Slide[] = [
     n: '03',
     claim: 'Así queda tu web con Talos dentro.',
     proof: 'Tres ejemplos',
-    desc: 'Negocios ficticios. IA real. Y si quieres verlo a pantalla completa: entra en la web del restaurante, arrastra la carta y reserva mesa con el camarero digital.',
+    desc: 'Negocios ficticios. IA real. Y si quieres verlo a pantalla completa: entra en la web de muestra con el botón "Web completa".',
     demo: <DemoWebs />,
   },
   {
     n: '04',
     wide: true,
-    claim: 'Una web de 10.000 € — de muestra.',
-    proof: 'Arrastra los platos',
-    desc: 'Esto es lo que entregamos: cada plato es un slide con foto real, el fondo cambia contigo y el maître es una IA. Arrastra ⟷ aquí, o entra en CENDRA, la web completa.',
-    demo: <Carta compact />,
+    claim: 'Una web de un par de miles de € — de muestra.',
+    proof: 'Navégala aquí',
+    desc: 'Esto es lo que entregamos: una web real, funcionando, con la IA dentro. Navégala aquí mismo, o entra a pantalla completa.',
+    demo: (
+      <iframe
+        src={DEMO_WEB_URL}
+        title="Web de muestra"
+        loading="lazy"
+        style={{
+          width: '100%', height: 'min(72vh, 640px)', display: 'block',
+          border: '1px solid var(--border-soft)', background: 'var(--bg-base)',
+        }}
+      />
+    ),
   },
   {
     n: '05',
@@ -141,7 +151,7 @@ export default function ProofSection() {
                   </Reveal>
                 </div>
                 <Reveal dir="fade" delay={200}>
-                  <a href="https://volea-padel.netlify.app" target="_blank" rel="noopener" style={{
+                  <a href={DEMO_WEB_URL} target="_blank" rel="noopener" style={{
                     fontFamily: 'var(--font-caps)', fontSize: 8.5, fontWeight: 600,
                     letterSpacing: 2.5, textTransform: 'uppercase',
                     color: 'var(--copper-soft)', border: '1px solid var(--copper-dim)',

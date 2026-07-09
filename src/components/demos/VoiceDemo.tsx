@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { VAPI_DEMO_URL } from '../../config'
+import Vapi from '@vapi-ai/web'
+import { VAPI_PUBLIC_KEY, VAPI_ASSISTANT_ID, VAPI_DEMO_URL } from '../../config'
 import { trackLead } from '../../leadScore'
 import { speak as speakTTS, stopSpeech } from '../../speech'
 
@@ -19,7 +20,127 @@ function getRecognition(): SpeechRecognitionCtor | null {
   return w.SpeechRecognition || w.webkitSpeechRecognition || null
 }
 
-function VapiWidget() {
+type VapiState = 'idle' | 'connecting' | 'live'
+
+function VapiCall() {
+  const [state, setState] = useState<VapiState>('idle')
+  const [volume, setVolume] = useState(0)
+  const [seconds, setSeconds] = useState(0)
+  const [failed, setFailed] = useState(false)
+  const vapiRef = useRef<Vapi | null>(null)
+  const timer = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  useEffect(() => () => {
+    if (timer.current) clearInterval(timer.current)
+    vapiRef.current?.stop()
+  }, [])
+
+  const getVapi = () => {
+    if (!vapiRef.current) {
+      const v = new Vapi(VAPI_PUBLIC_KEY)
+      v.on('call-start', () => {
+        setState('live')
+        setSeconds(0)
+        timer.current = setInterval(() => setSeconds(s => s + 1), 1000)
+      })
+      v.on('call-end', () => {
+        setState('idle')
+        if (timer.current) clearInterval(timer.current)
+      })
+      v.on('error', () => {
+        setState('idle')
+        setFailed(true)
+        if (timer.current) clearInterval(timer.current)
+      })
+      v.on('volume-level', (lvl: number) => setVolume(lvl))
+      vapiRef.current = v
+    }
+    return vapiRef.current
+  }
+
+  const toggle = () => {
+    const v = getVapi()
+    if (state !== 'idle') { v.stop(); return }
+    trackLead('habló con la voz IA', 25)
+    setFailed(false)
+    setState('connecting')
+    v.start(VAPI_ASSISTANT_ID)
+  }
+
+  const mmss = `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`
+  const glow = 1 + Math.min(volume, 1) * 0.35
+
+  return (
+    <div style={{
+      background: 'var(--bg-card)', border: '1px solid var(--border-soft)',
+      maxWidth: 520, width: '100%', minHeight: 420,
+      display: 'flex', flexDirection: 'column',
+    }}>
+      <div style={{
+        padding: '14px 18px', borderBottom: '1px solid var(--border-subtle)',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        fontFamily: 'var(--font-caps)', fontSize: 8, fontWeight: 600,
+        letterSpacing: 2.5, textTransform: 'uppercase', color: 'var(--copper-soft)',
+      }}>
+        <span>📞 Habla con nuestra IA · Voz real · En directo</span>
+        {state === 'live' && <span style={{ color: 'var(--teal)' }}>● {mmss}</span>}
+      </div>
+
+      <div style={{
+        flex: 1, display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center', gap: 22, padding: 32, textAlign: 'center',
+      }}>
+        <div style={{
+          width: 96, height: 96, borderRadius: '50%',
+          border: `1px solid ${state === 'live' ? 'var(--teal)' : 'var(--copper)'}`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 34,
+          transform: `scale(${state === 'live' ? glow : 1})`,
+          transition: 'transform 0.12s ease, border-color 0.3s',
+          boxShadow: state === 'live' ? '0 0 34px rgba(60,170,160,0.35)' : 'none',
+          animation: state === 'connecting' ? 'ringPulse 1.1s ease-in-out infinite' : 'none',
+        }}>
+          {state === 'live' ? '🎙️' : '📞'}
+        </div>
+
+        <p style={{
+          fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 16,
+          color: 'var(--text-secondary)', lineHeight: 1.6, maxWidth: 340, margin: 0,
+        }}>
+          {state === 'idle' && 'Cuando un cliente llama a tu negocio a las 21:40, ¿quién contesta? Aquí contesta nuestra IA. Habla con ella.'}
+          {state === 'connecting' && 'Conectando con la IA…'}
+          {state === 'live' && 'En llamada. Pregúntale lo que quieras — precios, citas, o si es humana.'}
+        </p>
+
+        <button onClick={toggle} style={{
+          fontFamily: 'var(--font-caps)', fontSize: 9, fontWeight: 600,
+          letterSpacing: 2.5, textTransform: 'uppercase',
+          background: state === 'live' ? '#7a2e2e' : 'var(--copper)', color: '#fff',
+          padding: '16px 36px', transition: 'background 0.2s',
+        }}>
+          {state === 'idle' ? 'Llamar a la IA →' : state === 'connecting' ? 'Conectando…' : 'Colgar'}
+        </button>
+
+        {failed && (
+          <span style={{ fontFamily: 'var(--font-sans)', fontSize: 11.5, color: 'var(--text-muted)' }}>
+            No se pudo conectar.{' '}
+            <a href={VAPI_DEMO_URL} target="_blank" rel="noopener" style={{ color: 'var(--copper-soft)' }}>
+              Prueba en pestaña nueva ↗
+            </a>
+          </span>
+        )}
+      </div>
+
+      <div style={{
+        padding: '10px 18px', borderTop: '1px solid var(--border-subtle)',
+        fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--text-muted)', textAlign: 'center',
+      }}>
+        Conversación libre — micrófono necesario. Esta misma voz puede coger tu teléfono.
+      </div>
+    </div>
+  )
+}
+
+function VapiNewTab() {
   return (
     <div style={{
       background: 'var(--bg-card)', border: '1px solid var(--border-soft)',
@@ -33,21 +154,31 @@ function VapiWidget() {
       }}>
         📞 Habla con nuestra IA · Voz real · En directo
       </div>
-      <iframe
-        src={VAPI_DEMO_URL}
-        title="Agente de voz IA — Talos Lynx"
-        allow="microphone; autoplay"
-        onLoad={() => trackLead('habló con la voz IA', 25)}
-        style={{ flex: 1, width: '100%', minHeight: 320, border: 'none', background: 'var(--bg-base)' }}
-      />
+      <div style={{
+        flex: 1, display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center', gap: 22, padding: 32, textAlign: 'center',
+      }}>
+        <p style={{
+          fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: 16,
+          color: 'var(--text-secondary)', lineHeight: 1.6, maxWidth: 340, margin: 0,
+        }}>
+          Cuando un cliente llama a tu negocio a las 21:40, ¿quién contesta? Aquí contesta nuestra IA. Habla con ella.
+        </p>
+        <a href={VAPI_DEMO_URL} target="_blank" rel="noopener"
+          onClick={() => trackLead('habló con la voz IA', 25)}
+          style={{
+            fontFamily: 'var(--font-caps)', fontSize: 9, fontWeight: 600,
+            letterSpacing: 2.5, textTransform: 'uppercase',
+            background: 'var(--copper)', color: '#fff', padding: '16px 36px',
+          }}>
+          Hablar con la IA ↗
+        </a>
+      </div>
       <div style={{
         padding: '10px 18px', borderTop: '1px solid var(--border-subtle)',
         fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--text-muted)', textAlign: 'center',
       }}>
-        Conversación libre — micrófono necesario.{' '}
-        <a href={VAPI_DEMO_URL} target="_blank" rel="noopener" style={{ color: 'var(--copper-soft)' }}>
-          Abrir en pestaña nueva ↗
-        </a>
+        Conversación libre — micrófono necesario. Esta misma voz puede coger tu teléfono.
       </div>
     </div>
   )
@@ -74,7 +205,8 @@ const OPTIONS: { label: string; key: keyof typeof REPLIES; youSay: string }[] = 
 ]
 
 export default function VoiceDemo() {
-  if (VAPI_DEMO_URL) return <VapiWidget />
+  if (VAPI_PUBLIC_KEY) return <VapiCall />
+  if (VAPI_DEMO_URL) return <VapiNewTab />
   return <VoiceSim />
 }
 

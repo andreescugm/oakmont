@@ -1,6 +1,9 @@
 // ── Configuración Talos Lynx ──────────────────────────────
-// URL compartida del agente de voz de Vapi (Dashboard → Assistant → Share).
-// Mientras esté vacía, la demo de voz usa la simulación local (Aria).
+// Agente de voz de Vapi.
+// VAPI_PUBLIC_KEY: Dashboard → dashboard.vapi.ai/keys → Public Key.
+// Con la key, el agente funciona embebido en la web; sin ella, botón a pestaña nueva.
+export const VAPI_PUBLIC_KEY = ''
+export const VAPI_ASSISTANT_ID = '23fca808-715f-42df-8157-500a231bb656'
 export const VAPI_DEMO_URL = 'https://vapi.ai?demo=true&shareKey=15ab95c0-3760-4129-824a-0f10efc3b251&assistantId=23fca808-715f-42df-8157-500a231bb656'
 
 // URL de la web de demostración ("Web completa ↗").
