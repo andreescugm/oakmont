@@ -353,7 +353,7 @@ export default function DemoWebs() {
           {playing ? 'La IA está atendiendo…' : shown > 0 ? '↻ Repetir demo' : '▶ Ver a la IA atender'}
         </button>
         {site.id === 'restaurante' && (
-          <a href="/demo/cendra/" target="_blank" rel="noopener" style={{
+          <a href="https://volea-padel.netlify.app" target="_blank" rel="noopener" style={{
             padding: '14px 18px', display: 'flex', alignItems: 'center',
             fontFamily: 'var(--font-caps)', fontSize: 8.5, fontWeight: 600,
             letterSpacing: 2, textTransform: 'uppercase',

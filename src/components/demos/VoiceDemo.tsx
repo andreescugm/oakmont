@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { ELEVENLABS_AGENT_ID } from '../../config'
+import { VAPI_DEMO_URL } from '../../config'
 import { trackLead } from '../../leadScore'
 import { speak as speakTTS, stopSpeech } from '../../speech'
 
@@ -19,33 +19,7 @@ function getRecognition(): SpeechRecognitionCtor | null {
   return w.SpeechRecognition || w.webkitSpeechRecognition || null
 }
 
-function ElevenLabsWidget({ onBroken }: { onBroken: () => void }) {
-  const holder = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const SRC = 'https://unpkg.com/@elevenlabs/convai-widget-embed'
-    if (!document.querySelector(`script[src="${SRC}"]`)) {
-      const s = document.createElement('script')
-      s.src = SRC
-      s.async = true
-      s.type = 'text/javascript'
-      document.body.appendChild(s)
-    }
-    if (holder.current) {
-      holder.current.innerHTML = `<elevenlabs-convai agent-id="${ELEVENLABS_AGENT_ID}"></elevenlabs-convai>`
-    }
-    // failsafe: si en 5s el widget no ha pintado nada (agent inválido,
-    // sin widget_config, red caída…), caemos a la simulación local.
-    const t = setTimeout(() => {
-      const el = holder.current?.querySelector('elevenlabs-convai')
-      const sr = el?.shadowRoot
-      const painted = sr && sr.childElementCount > 0 &&
-        ![...sr.children].every(c => c.tagName === 'TEMPLATE' && !(c as HTMLTemplateElement).content.childElementCount)
-      if (!painted) onBroken()
-    }, 5000)
-    return () => clearTimeout(t)
-  }, [onBroken])
-
+function VapiWidget() {
   return (
     <div style={{
       background: 'var(--bg-card)', border: '1px solid var(--border-soft)',
@@ -59,13 +33,21 @@ function ElevenLabsWidget({ onBroken }: { onBroken: () => void }) {
       }}>
         📞 Habla con nuestra IA · Voz real · En directo
       </div>
-      <div ref={holder} onClick={() => trackLead('habló con la voz IA', 25)}
-        style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} />
+      <iframe
+        src={VAPI_DEMO_URL}
+        title="Agente de voz IA — Talos Lynx"
+        allow="microphone; autoplay"
+        onLoad={() => trackLead('habló con la voz IA', 25)}
+        style={{ flex: 1, width: '100%', minHeight: 320, border: 'none', background: 'var(--bg-base)' }}
+      />
       <div style={{
         padding: '10px 18px', borderTop: '1px solid var(--border-subtle)',
         fontFamily: 'var(--font-sans)', fontSize: 11, color: 'var(--text-muted)', textAlign: 'center',
       }}>
-        Conversación libre — micrófono necesario. Esta misma voz puede coger tu teléfono.
+        Conversación libre — micrófono necesario.{' '}
+        <a href={VAPI_DEMO_URL} target="_blank" rel="noopener" style={{ color: 'var(--copper-soft)' }}>
+          Abrir en pestaña nueva ↗
+        </a>
       </div>
     </div>
   )
@@ -92,8 +74,7 @@ const OPTIONS: { label: string; key: keyof typeof REPLIES; youSay: string }[] = 
 ]
 
 export default function VoiceDemo() {
-  const [broken, setBroken] = useState(false)
-  if (ELEVENLABS_AGENT_ID && !broken) return <ElevenLabsWidget onBroken={() => setBroken(true)} />
+  if (VAPI_DEMO_URL) return <VapiWidget />
   return <VoiceSim />
 }
 

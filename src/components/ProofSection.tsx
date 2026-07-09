@@ -141,7 +141,7 @@ export default function ProofSection() {
                   </Reveal>
                 </div>
                 <Reveal dir="fade" delay={200}>
-                  <a href="/demo/cendra/" target="_blank" rel="noopener" style={{
+                  <a href="https://volea-padel.netlify.app" target="_blank" rel="noopener" style={{
                     fontFamily: 'var(--font-caps)', fontSize: 8.5, fontWeight: 600,
                     letterSpacing: 2.5, textTransform: 'uppercase',
                     color: 'var(--copper-soft)', border: '1px solid var(--copper-dim)',
