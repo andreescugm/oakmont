@@ -352,17 +352,6 @@ export default function DemoWebs() {
         }}>
           {playing ? 'La IA está atendiendo…' : shown > 0 ? '↻ Repetir demo' : '▶ Ver a la IA atender'}
         </button>
-        {site.id === 'restaurante' && (
-          <a href="https://volea-padel.netlify.app" target="_blank" rel="noopener" style={{
-            padding: '14px 18px', display: 'flex', alignItems: 'center',
-            fontFamily: 'var(--font-caps)', fontSize: 8.5, fontWeight: 600,
-            letterSpacing: 2, textTransform: 'uppercase',
-            color: 'var(--copper-soft)', background: 'var(--copper-glow)',
-            borderLeft: '1px solid var(--border-subtle)', whiteSpace: 'nowrap',
-          }}>
-            Web completa ↗
-          </a>
-        )}
       </div>
     </div>
   )

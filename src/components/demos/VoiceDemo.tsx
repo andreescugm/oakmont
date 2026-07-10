@@ -1,8 +1,13 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import Vapi from '@vapi-ai/web'
+import * as VapiModule from '@vapi-ai/web'
 import { VAPI_PUBLIC_KEY, VAPI_ASSISTANT_ID, VAPI_DEMO_URL } from '../../config'
 import { trackLead } from '../../leadScore'
 import { speak as speakTTS, stopSpeech } from '../../speech'
+
+type VapiClient = InstanceType<typeof import('@vapi-ai/web').default>
+type VapiCtor = new (publicKey: string) => VapiClient
+
+const Vapi = ((VapiModule.default as unknown as { default?: VapiCtor }).default ?? VapiModule.default) as VapiCtor
 
 type SpeechRecognitionCtor = new () => {
   lang: string
@@ -27,7 +32,7 @@ function VapiCall() {
   const [volume, setVolume] = useState(0)
   const [seconds, setSeconds] = useState(0)
   const [failed, setFailed] = useState(false)
-  const vapiRef = useRef<Vapi | null>(null)
+  const vapiRef = useRef<VapiClient | null>(null)
   const timer = useRef<ReturnType<typeof setInterval> | null>(null)
 
   useEffect(() => () => {
@@ -47,7 +52,8 @@ function VapiCall() {
         setState('idle')
         if (timer.current) clearInterval(timer.current)
       })
-      v.on('error', () => {
+      v.on('error', (err: unknown) => {
+        console.error('[Vapi]', err)
         setState('idle')
         setFailed(true)
         if (timer.current) clearInterval(timer.current)
@@ -58,13 +64,20 @@ function VapiCall() {
     return vapiRef.current
   }
 
-  const toggle = () => {
+  const toggle = async () => {
     const v = getVapi()
     if (state !== 'idle') { v.stop(); return }
     trackLead('habló con la voz IA', 25)
     setFailed(false)
     setState('connecting')
-    v.start(VAPI_ASSISTANT_ID)
+    try {
+      await v.start(VAPI_ASSISTANT_ID)
+    } catch (err) {
+      console.error('[Vapi start]', err)
+      setState('idle')
+      setFailed(true)
+      if (timer.current) clearInterval(timer.current)
+    }
   }
 
   const mmss = `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`
