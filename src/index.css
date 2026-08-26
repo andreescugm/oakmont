@@ -239,6 +239,16 @@ img { display: block; max-width: 100%; }
   }
   .footer-grid {
     grid-template-columns: 1fr !important;
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+    gap: 40px !important;
+  }
+  .footer-bottom {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 14px !important;
+    padding-left: 24px !important;
+    padding-right: 24px !important;
   }
   .wrap, .wrap-narrow {
     padding-left: 24px !important;

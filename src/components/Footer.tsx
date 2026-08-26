@@ -15,8 +15,10 @@ const company: { label: string; href: string }[] = [
 ]
 
 const legal: { label: string; href: string }[] = [
-  { label: 'Privacidad',  href: '#privacidad' },
-  { label: 'Aviso legal', href: '#aviso-legal' },
+  { label: 'Privacidad',     href: '#privacidad' },
+  { label: 'Cookies',        href: '#cookies' },
+  { label: 'Términos de uso', href: '#terminos' },
+  { label: 'Aviso legal',    href: '#aviso-legal' },
 ]
 
 export default function Footer() {
@@ -26,7 +28,7 @@ export default function Footer() {
       borderTop: '1px solid var(--border-subtle)',
       padding: '72px 0 0',
     }}>
-      <div style={{
+      <div className="footer-grid" style={{
         maxWidth: 1200, margin: '0 auto', padding: '0 48px',
         display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr',
         gap: 48, marginBottom: 52,
@@ -87,7 +89,7 @@ export default function Footer() {
         ))}
       </div>
 
-      <div style={{
+      <div className="footer-bottom" style={{
         borderTop: '1px solid var(--border-subtle)',
         padding: '22px 48px',
         maxWidth: 1200, margin: '0 auto',
@@ -96,7 +98,7 @@ export default function Footer() {
         letterSpacing: 1.8, textTransform: 'uppercase', color: 'var(--text-muted)',
       }}>
         <span>© 2026 Talos Lynx · Andreescu Oakmont S.L. Todos los derechos reservados.</span>
-        <div style={{ display: 'flex', gap: 20 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 20 }}>
           {legal.map(l => (
             <a key={l.label} href={l.href} style={{ color: 'var(--text-muted)', transition: 'color 0.2s' }}
             onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--copper-soft)'}

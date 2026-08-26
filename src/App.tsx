@@ -25,10 +25,10 @@ const HIDDEN_SECTIONS = new Set([
   'sobre-nosotros', 'metodologia', 'casos-exito',
   'servicios', 'diagnostico-estrategico', 'diseno-sistema',
   'implementacion-ia', 'automatizacion-comercial', 'cualificacion-leads',
-  'privacidad', 'aviso-legal', 'demo-restaurante',
+  'privacidad', 'cookies', 'terminos', 'aviso-legal', 'demo-restaurante',
 ])
 
-type SectionView = 'services' | 'sobre-nosotros' | 'metodologia' | 'casos-exito' | 'privacidad' | 'aviso-legal' | 'demo-restaurante'
+type SectionView = 'services' | 'sobre-nosotros' | 'metodologia' | 'casos-exito' | 'privacidad' | 'cookies' | 'terminos' | 'aviso-legal' | 'demo-restaurante'
 
 const HASH_TO_VIEW: Record<string, SectionView> = {
   servicios: 'services',
@@ -41,6 +41,8 @@ const HASH_TO_VIEW: Record<string, SectionView> = {
   metodologia: 'metodologia',
   'casos-exito': 'casos-exito',
   privacidad: 'privacidad',
+  cookies: 'cookies',
+  terminos: 'terminos',
   'aviso-legal': 'aviso-legal',
   'demo-restaurante': 'demo-restaurante',
 }
@@ -54,6 +56,7 @@ export default function App() {
   const [scrollPct, setScrollPct] = useState(0)
   const [scrollY, setScrollY] = useState(0)
   const [activeSection, setActiveSection] = useState<string | null>(null)
+  const [footerVisible, setFooterVisible] = useState(false)
   const savedScrollY = useRef(0)
   const pendingScroll = useRef<string | null>(null)
 
@@ -77,6 +80,18 @@ export default function App() {
     onScroll()
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  // La barra fija de CTA se retira al llegar al footer para no taparlo.
+  useEffect(() => {
+    const el = document.querySelector('footer')
+    if (!el) return
+    const io = new IntersectionObserver(
+      entries => setFooterVisible(entries[0].isIntersecting),
+      { threshold: 0 },
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [activeSection])
 
   useEffect(() => {
     const hash = window.location.hash.slice(1)
@@ -172,8 +187,10 @@ export default function App() {
             {view === 'sobre-nosotros' && <CompanyPages />}
             {view === 'metodologia' && <CompanyPages />}
             {view === 'casos-exito' && <CompanyPages />}
-            {view === 'privacidad' && <Legal />}
-            {view === 'aviso-legal' && <Legal />}
+            {view === 'privacidad' && <Legal page="privacidad" />}
+            {view === 'cookies' && <Legal page="cookies" />}
+            {view === 'terminos' && <Legal page="terminos" />}
+            {view === 'aviso-legal' && <Legal page="aviso-legal" />}
             {view === 'demo-restaurante' && <RestaurantDemo />}
           </main>
           <Footer />
@@ -193,7 +210,7 @@ export default function App() {
             <FinalCTA />
           </main>
           <Footer />
-          <StickyBar show={scrollY > 800} />
+          <StickyBar show={scrollY > 800 && !footerVisible} />
         </>
       )}
     </>
